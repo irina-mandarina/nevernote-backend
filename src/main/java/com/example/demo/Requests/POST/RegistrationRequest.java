@@ -1,4 +1,4 @@
-package Requests.POST;
+package com.example.demo.Requests.POST;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

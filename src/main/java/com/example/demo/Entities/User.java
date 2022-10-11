@@ -1,4 +1,4 @@
-package Entities;
+package com.example.demo.Entities;
 
 import com.sun.istack.NotNull;
 import lombok.*;
@@ -9,7 +9,6 @@ import javax.persistence.*;
 @Setter
 @Entity
 @NoArgsConstructor
-@RequiredArgsConstructor
 //@Table(name = "users")
 public class User {
     @Id

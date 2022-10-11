@@ -1,6 +1,5 @@
-package Entities;
+package com.example.demo.Entities;
 
-import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

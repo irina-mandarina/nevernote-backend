@@ -1,6 +1,6 @@
-package Repositories;
+package com.example.demo.Repositories;
 
-import Entities.User;
+import com.example.demo.Entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;

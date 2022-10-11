@@ -1,8 +1,7 @@
-package Controllers;
+package com.example.demo.Controllers;
 
-import Entities.Note;
-import Requests.POST.NoteRequest;
-import Services.NoteService;
+import com.example.demo.Requests.POST.NoteRequest;
+import com.example.demo.Services.NoteService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,13 +1,14 @@
-package Services;
+package com.example.demo.Services;
 
-import Entities.User;
-import Requests.POST.LogInRequest;
-import Requests.POST.RegistrationRequest;
+import com.example.demo.Entities.User;
+import com.example.demo.Requests.POST.LogInRequest;
+import com.example.demo.Requests.POST.RegistrationRequest;
 import lombok.RequiredArgsConstructor;
-import Repositories.Store;
+import com.example.demo.Repositories.Store;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Objects;
 
@@ -17,8 +18,10 @@ public class UserServiceImpl implements UserService {
     private final Store store;
 
     @Override
-    public ResponseEntity<String> registerUser(RegistrationRequest registrationRequest) {
+    public ResponseEntity<String> registerUser(@RequestBody RegistrationRequest registrationRequest) {
         if (store.usernameExists(registrationRequest.getUsername())) {
+            System.out.println("\"Username is taken\",\n" +
+                    "                    HttpStatus.BAD_REQUEST");
             return new ResponseEntity<>(
                     "Username is taken",
                     HttpStatus.BAD_REQUEST
@@ -31,13 +34,15 @@ public class UserServiceImpl implements UserService {
         newUser.setAge(registrationRequest.getAge());
         newUser.setPassword(registrationRequest.getPassword());
         store.saveUser(newUser);
+        store.logUser(newUser.getUsername());
+        System.out.println("HttpStatus.CREATED");
         return new ResponseEntity<>(
                 HttpStatus.CREATED
         );
     }
 
     @Override
-    public ResponseEntity<String> logUser(LogInRequest logInRequest) {
+    public ResponseEntity<String> logUser(@RequestBody LogInRequest logInRequest) {
         if (!store.usernameExists(logInRequest.getUsername())) {
             return new ResponseEntity<>(
                     "Username not found",
@@ -51,14 +56,15 @@ public class UserServiceImpl implements UserService {
                     HttpStatus.UNAUTHORIZED
             );
         }
+        store.logUser(user.getUsername());
         return new ResponseEntity<>(
                 HttpStatus.OK
         );
     }
 
     @Override
-    public ResponseEntity<String> logOut() {
-        store.logOut();
+    public ResponseEntity<String> logOut(String username) {
+        store.logOut(username);
         return new ResponseEntity<>(
                 HttpStatus.NO_CONTENT
         );
