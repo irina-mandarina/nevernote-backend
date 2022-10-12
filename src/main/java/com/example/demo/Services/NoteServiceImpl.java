@@ -67,8 +67,8 @@ public class NoteServiceImpl implements NoteService {
         note.setDate(new Timestamp(date.getTime()));
 
         store.addNote(note, username);
-        System.out.println("HttpStatus.CREATED");
 
+        System.out.println("HttpStatus.CREATED");
         return new ResponseEntity<>(
                 HttpStatus.CREATED
         );
@@ -90,20 +90,12 @@ public class NoteServiceImpl implements NoteService {
             );
         }
 
-        Note note = new Note();
-
-        note.setContent(noteRequest.getContent());
-        note.setTitle(noteRequest.getTitle());
-        note.setUser(store.findUserByUsername(username));
-        note.setId(id);
-        note.setDate(store.findNoteById(id, username).getDate());
-
-        store.editNote(note, username);
+        store.editNote(id, username, noteRequest.getTitle(), noteRequest.getContent());
 
         System.out.println("HttpStatus.CREATED");
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(note.toString());
+                .body(store.getNoteJson(id, username));
     }
 
     @Override

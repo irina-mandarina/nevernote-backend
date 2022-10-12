@@ -63,18 +63,20 @@ public class Store {
         loggedUsers.remove(username);
     }
 
-    public String getNotesStr(String username) {
-        return notes.get(findUserByUsername(username)).toString();
-    }
-
-    public void addNote(Note note, String username) {
+    public void initNotes(String username) {
         if (Objects.isNull(notes.get(findUserByUsername(username)))) {
             notes.put(findUserByUsername(username), new ArrayList<>(100));
         }
+    }
+
+    public void addNote(Note note, String username) {
+        initNotes(username);
         notes.get(findUserByUsername(username)).add(note);
+        System.out.println(username + " added a new note: " + notes.get(findUserByUsername(username)).get(notes.get(findUserByUsername(username)).size()-1));
     }
 
     public Long noteIndex(Note note) { // the index in the list: might not be equal to the note id
+        initNotes(note.getUser().getUsername());
         Note n = findNoteById(note.getId(), note.getUser().getUsername());
         if (n == null) {
             return (long) -1;
@@ -83,7 +85,8 @@ public class Store {
     }
 
     public Note findNoteById(Long id, String username) {
-        for (Note n: notes.get(username)) {
+        initNotes(username);
+        for (Note n: notes.get(findUserByUsername(username))) {
             if (n.getId() == id) {
                 return n;
             }
@@ -91,11 +94,19 @@ public class Store {
         return null;
     }
 
-    public void editNote(Note note, String username) {
-        notes.get(findUserByUsername(username)).set(Math.toIntExact(noteIndex(note)), note);
+    public void editNote(Long id, String username, String title, String content) {
+        initNotes(username);
+        for (Note n: notes.get(findUserByUsername(username))) {
+            if (n.getId() == id) {
+                n.setTitle(title);
+                n.setContent(content);
+                return;
+            }
+        }
     }
 
     public void deleteNote(Long id, String username) {
+        initNotes(username);
         notes.get(findUserByUsername(username)).remove(findNoteById(id, username));
     }
 
@@ -107,15 +118,29 @@ public class Store {
     }
 
     public String getNotesJson(String username) {
-        String result = "{\n";
-        for (Note note: notes.get(findUserByUsername(username))) {
-            result += "\"[content\": " + "\"" + note.getContent() + "\"" + "\n";
-            result += "\"date\": " + "\"" + note.getDate() + "\"" + "\n";
-            result += "\"id\": " + "\"" + note.getId() + "\"" + "\n";
-            result += "\"title\": " + "\"" + note.getTitle() + "\"" + "\n";
-            result += "\"user\": " + "\"" + username + "\"" + "], \n";
+        String result = "[\n";
+        if (Objects.isNull(notes.get(findUserByUsername(username)))) {
+            return "[]";
         }
-        result += "\n}";
+        for (Note note: notes.get(findUserByUsername(username))) {
+            result += getNoteJson(note.getId(), username);
+            result += ", \n";
+        }
+        result += "]";
+        return result;
+    }
+
+    public String getNoteJson(Long id, String username) {
+        Note note = findNoteById(id, username);
+        if (Objects.isNull(note)) {
+            return "{}";
+        }
+        String result = "{\n";
+        result += "    \"content\": " + "\"" + note.getContent() + "\"" + "\n";
+        result += "    \"date\": " + "\"" + note.getDate() + "\"" + "\n";
+        result += "    \"id\": " + "\"" + note.getId() + "\"" + "\n";
+        result += "    \"title\": " + "\"" + note.getTitle() + "\"" + "\n";
+        result += "    \"user\": " + "\"" + username + "\"" + "}";
         return result;
     }
 }

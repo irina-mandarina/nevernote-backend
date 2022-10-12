@@ -21,12 +21,12 @@ public class NoteController {
         return noteService.addNote(username, noteRequest);
     }
 
-    @PutMapping("/notes/:{id}")
+    @PutMapping("/notes/{id}")
     ResponseEntity<String> editNote(@PathVariable("id") Long id, @RequestHeader String username, @RequestBody NoteRequest noteRequest) {
         return noteService.editNote(id, username, noteRequest);
     }
 
-    @DeleteMapping("/notes/:{id}")
+    @DeleteMapping("/notes/{id}")
     ResponseEntity<String> deleteNote(@PathVariable("id") Long id, @RequestHeader String username) {
         return noteService.deleteNote(id, username);
     }
