@@ -11,4 +11,6 @@ public interface UserService {
     ResponseEntity<String> logUser(@RequestBody LogInRequest logInRequest);
 
     ResponseEntity<String> logOut(@RequestHeader String username);
+
+    ResponseEntity<String> userDetails(String username);
 }

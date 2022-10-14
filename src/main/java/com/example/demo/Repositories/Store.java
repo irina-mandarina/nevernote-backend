@@ -87,7 +87,7 @@ public class Store {
     public Note findNoteById(Long id, String username) {
         initNotes(username);
         for (Note n: notes.get(findUserByUsername(username))) {
-            if (n.getId() == id) {
+            if (Objects.equals(n.getId(), id)) {
                 return n;
             }
         }
@@ -97,7 +97,7 @@ public class Store {
     public void editNote(Long id, String username, String title, String content) {
         initNotes(username);
         for (Note n: notes.get(findUserByUsername(username))) {
-            if (n.getId() == id) {
+            if (Objects.equals(n.getId(), id)) {
                 n.setTitle(title);
                 n.setContent(content);
                 return;
@@ -114,20 +114,22 @@ public class Store {
         if (Objects.isNull(notes) || Objects.isNull(notes.get(findUserByUsername(username)))) {
             return 0L;
         }
-        return Long.valueOf(notes.get(findUserByUsername(username)).size());
+        return (long) notes.get(findUserByUsername(username)).size();
     }
 
     public String getNotesJson(String username) {
-        String result = "[\n";
+        StringBuilder result = new StringBuilder("[\n");
         if (Objects.isNull(notes.get(findUserByUsername(username)))) {
             return "[]";
         }
         for (Note note: notes.get(findUserByUsername(username))) {
-            result += getNoteJson(note.getId(), username);
-            result += ", \n";
+            result.append(getNoteJson(note.getId(), username));
+            if (note != notes.get(findUserByUsername(username)).get(notes.get(findUserByUsername(username)).size()-1)) {
+                result.append(", \n");
+            }
         }
-        result += "]";
-        return result;
+        result.append("\n]");
+        return result.toString();
     }
 
     public String getNoteJson(Long id, String username) {
@@ -136,11 +138,24 @@ public class Store {
             return "{}";
         }
         String result = "{\n";
-        result += "    \"content\": " + "\"" + note.getContent() + "\"" + "\n";
-        result += "    \"date\": " + "\"" + note.getDate() + "\"" + "\n";
-        result += "    \"id\": " + "\"" + note.getId() + "\"" + "\n";
-        result += "    \"title\": " + "\"" + note.getTitle() + "\"" + "\n";
-        result += "    \"user\": " + "\"" + username + "\"" + "}";
+        result += "\"content\": " + "\"" + note.getContent() + "\"" + "\n";
+        result += "\"date\": " + "\"" + note.getDate() + "\"" + "\n";
+        result += "\"id\": " + "\"" + note.getId() + "\"" + "\n";
+        result += "\"title\": " + "\"" + note.getTitle() + "\"" + "\n";
+        result += "\"user\": " + "\"" + username + "\"" + "\n}";
+        return result;
+    }
+
+    public String userDetails(String username) {
+        User user = findUserByUsername(username);
+        String result = "{\n";
+        result += "    \"username\": " + "\"" + username + "\"\n";
+        result += "    \"password\": " + "\"" + user.getPassword() + "\"\n";
+        result += "    \"name\": " + "\"" + user.getName() + "\"\n";
+        result += "    \"age\": " + user.getAge() + "\n";
+        result += "    \"address\": " + "\"" + user.getAddress() + "\"\n";
+        result += "}";
+
         return result;
     }
 }

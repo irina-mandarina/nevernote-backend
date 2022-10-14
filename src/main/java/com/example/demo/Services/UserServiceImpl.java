@@ -3,9 +3,12 @@ package com.example.demo.Services;
 import com.example.demo.Entities.User;
 import com.example.demo.Requests.POST.LogInRequest;
 import com.example.demo.Requests.POST.RegistrationRequest;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import com.example.demo.Repositories.Store;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +23,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequest registrationRequest) {
         if (store.usernameExists(registrationRequest.getUsername())) {
-            System.out.println("\"Username is taken\",\n" +
-                    "                    HttpStatus.BAD_REQUEST");
             return new ResponseEntity<>(
                     "Username is taken",
                     HttpStatus.BAD_REQUEST
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(registrationRequest.getPassword());
         store.saveUser(newUser);
         store.logUser(newUser.getUsername());
-        System.out.println("HttpStatus.CREATED");
+
         return new ResponseEntity<>(
                 HttpStatus.CREATED
         );
@@ -68,5 +69,23 @@ public class UserServiceImpl implements UserService {
         return new ResponseEntity<>(
                 HttpStatus.NO_CONTENT
         );
+    }
+
+    @Override
+    public ResponseEntity<String> userDetails(String username) {
+        if (username.isEmpty() || !store.usernameExists(username) || !store.isLogged(username)) {
+            return new ResponseEntity<>(
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        final HttpHeaders httpHeaders= new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        Gson gson = new Gson();
+
+        return ResponseEntity.ok()
+                .headers(httpHeaders)
+                .body(gson.toJson(store.findUserByUsername(username)));
     }
 }
