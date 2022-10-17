@@ -75,15 +75,6 @@ public class Store {
         System.out.println(username + " added a new note: " + notes.get(findUserByUsername(username)).get(notes.get(findUserByUsername(username)).size()-1));
     }
 
-    public Long noteIndex(Note note) { // the index in the list: might not be equal to the note id
-        initNotes(note.getUser().getUsername());
-        Note n = findNoteById(note.getId(), note.getUser().getUsername());
-        if (n == null) {
-            return (long) -1;
-        }
-        return n.getId();
-    }
-
     public Note findNoteById(Long id, String username) {
         initNotes(username);
         for (Note n: notes.get(findUserByUsername(username))) {
@@ -115,47 +106,5 @@ public class Store {
             return 0L;
         }
         return (long) notes.get(findUserByUsername(username)).size();
-    }
-
-    public String getNotesJson(String username) {
-        StringBuilder result = new StringBuilder("[\n");
-        if (Objects.isNull(notes.get(findUserByUsername(username)))) {
-            return "[]";
-        }
-        for (Note note: notes.get(findUserByUsername(username))) {
-            result.append(getNoteJson(note.getId(), username));
-            if (note != notes.get(findUserByUsername(username)).get(notes.get(findUserByUsername(username)).size()-1)) {
-                result.append(", \n");
-            }
-        }
-        result.append("\n]");
-        return result.toString();
-    }
-
-    public String getNoteJson(Long id, String username) {
-        Note note = findNoteById(id, username);
-        if (Objects.isNull(note)) {
-            return "{}";
-        }
-        String result = "{\n";
-        result += "\"content\": " + "\"" + note.getContent() + "\"" + "\n";
-        result += "\"date\": " + "\"" + note.getDate() + "\"" + "\n";
-        result += "\"id\": " + "\"" + note.getId() + "\"" + "\n";
-        result += "\"title\": " + "\"" + note.getTitle() + "\"" + "\n";
-        result += "\"user\": " + "\"" + username + "\"" + "\n}";
-        return result;
-    }
-
-    public String userDetails(String username) {
-        User user = findUserByUsername(username);
-        String result = "{\n";
-        result += "    \"username\": " + "\"" + username + "\"\n";
-        result += "    \"password\": " + "\"" + user.getPassword() + "\"\n";
-        result += "    \"name\": " + "\"" + user.getName() + "\"\n";
-        result += "    \"age\": " + user.getAge() + "\n";
-        result += "    \"address\": " + "\"" + user.getAddress() + "\"\n";
-        result += "}";
-
-        return result;
     }
 }

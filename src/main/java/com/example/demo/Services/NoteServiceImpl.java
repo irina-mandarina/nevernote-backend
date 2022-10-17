@@ -24,16 +24,7 @@ public class NoteServiceImpl implements NoteService {
     private final Store store;
 
     boolean unauthorized(String username) {
-        if (username.isEmpty()/* || !store.usernameExists(username) || !store.isLogged(username)*/) {
-            System.out.println(username + " is empty");
-            return true;
-        }
-        if (!store.usernameExists(username)) {
-            System.out.println(username + " does not exist");
-            return true;
-        }
-        if (!store.isLogged(username)) {
-            System.out.println(username + " is not logged");
+        if (username.isEmpty() || !store.usernameExists(username) || !store.isLogged(username)) {
             return true;
         }
         return false;
@@ -93,10 +84,16 @@ public class NoteServiceImpl implements NoteService {
             );
         }
 
+        Gson gson = new Gson();
+
+        final HttpHeaders httpHeaders= new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
         store.editNote(id, username, noteRequest.getTitle(), noteRequest.getContent());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(store.getNoteJson(id, username));
+                .headers(httpHeaders)
+                .body(gson.toJson(store.findNoteById(id, username)));
     }
 
     @Override

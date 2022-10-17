@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.Objects;
 
@@ -72,8 +73,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<String> userDetails(String username) {
-        if (username.isEmpty() || !store.usernameExists(username) || !store.isLogged(username)) {
+    public ResponseEntity<String> userDetails(@RequestHeader String username) {
+        if (username.isEmpty() || !store.usernameExists(username)) {
             return new ResponseEntity<>(
                     HttpStatus.UNAUTHORIZED
             );
