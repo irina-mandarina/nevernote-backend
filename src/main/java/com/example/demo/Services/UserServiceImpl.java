@@ -1,11 +1,12 @@
 package com.example.demo.Services;
 
 import com.example.demo.Entities.User;
+import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Requests.GET.GetUserDetails;
 import com.example.demo.Requests.POST.LogInRequest;
 import com.example.demo.Requests.POST.RegistrationRequest;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
-import com.example.demo.Repositories.Store;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,11 +20,12 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final Store store;
+    private final UserRepository userRepository;
+    private final LoggedService loggedService;
 
     @Override
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequest registrationRequest) {
-        if (store.usernameExists(registrationRequest.getUsername())) {
+        if (!Objects.isNull(findByUsername(registrationRequest.getUsername()))) {
             return new ResponseEntity<>(
                     "Username is taken",
                     HttpStatus.BAD_REQUEST
@@ -35,8 +37,8 @@ public class UserServiceImpl implements UserService {
         newUser.setAddress(registrationRequest.getAddress());
         newUser.setAge(registrationRequest.getAge());
         newUser.setPassword(registrationRequest.getPassword());
-        store.saveUser(newUser);
-        store.logUser(newUser.getUsername());
+        userRepository.save(newUser);
+        loggedService.startSession(newUser);
 
         return new ResponseEntity<>(
                 HttpStatus.CREATED
@@ -45,20 +47,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> logUser(@RequestBody LogInRequest logInRequest) {
-        if (!store.usernameExists(logInRequest.getUsername())) {
+        if (Objects.isNull(findByUsername(logInRequest.getUsername()))) {
             return new ResponseEntity<>(
                     "Username not found",
                     HttpStatus.UNAUTHORIZED
             );
         }
-        User user = store.findUserByUsername(logInRequest.getUsername());
+        User user = findByUsername(logInRequest.getUsername());
         if (!Objects.equals(logInRequest.getPassword(), user.getPassword())) {
             return new ResponseEntity<>(
                     "Wrong password",
                     HttpStatus.UNAUTHORIZED
             );
         }
-        store.logUser(user.getUsername());
+        loggedService.startSession(user);
         return new ResponseEntity<>(
                 HttpStatus.OK
         );
@@ -66,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> logOut(String username) {
-        store.logOut(username);
+        loggedService.endSession(findByUsername(username));
         return new ResponseEntity<>(
                 HttpStatus.NO_CONTENT
         );
@@ -74,11 +76,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> userDetails(@RequestHeader String username) {
-        if (username.isEmpty() || !store.usernameExists(username)) {
+        if (username.isEmpty() || Objects.isNull(findByUsername(username)) ) {
             return new ResponseEntity<>(
                     HttpStatus.UNAUTHORIZED
             );
         }
+
+        User user = findByUsername(username);
+        GetUserDetails userDetails = new GetUserDetails(user);
 
         final HttpHeaders httpHeaders= new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -87,6 +92,11 @@ public class UserServiceImpl implements UserService {
 
         return ResponseEntity.ok()
                 .headers(httpHeaders)
-                .body(gson.toJson(store.findUserByUsername(username)));
+                .body(gson.toJson( userDetails ));
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }

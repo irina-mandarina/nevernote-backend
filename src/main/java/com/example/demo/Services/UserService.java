@@ -1,5 +1,6 @@
 package com.example.demo.Services;
 
+import com.example.demo.Entities.User;
 import com.example.demo.Requests.POST.LogInRequest;
 import com.example.demo.Requests.POST.RegistrationRequest;
 import org.springframework.http.ResponseEntity;
@@ -13,4 +14,6 @@ public interface UserService {
     ResponseEntity<String> logOut(@RequestHeader String username);
 
     ResponseEntity<String> userDetails(String username);
+
+    User findByUsername(String username);
 }
