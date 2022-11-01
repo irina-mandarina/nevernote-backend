@@ -35,4 +35,10 @@ public class UserController {
     ResponseEntity<String> userDetails(@RequestHeader String username) {
         return userService.userDetails(username);
     }
+
+    @CrossOrigin
+    @PutMapping("/profile/setbio")
+    ResponseEntity<String> setBio(@RequestHeader String username, @RequestBody String newBio) {
+        return userService.setBio(username, newBio);
+    }
 }

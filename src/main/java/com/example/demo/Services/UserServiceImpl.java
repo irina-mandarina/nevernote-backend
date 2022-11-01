@@ -99,4 +99,14 @@ public class UserServiceImpl implements UserService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    @Override
+    public ResponseEntity<String> setBio(String username, String bio) {
+        User user = findByUsername(username);
+        user.setBio(bio);
+        userRepository.save(user);
+        return new ResponseEntity<>(
+                HttpStatus.OK
+        );
+    }
 }

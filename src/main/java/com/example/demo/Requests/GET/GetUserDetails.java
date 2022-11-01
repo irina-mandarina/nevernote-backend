@@ -28,5 +28,6 @@ public class GetUserDetails {
         this.name = user.getName();
         this.address = user.getAddress();
         this.age = user.getAge();
+        this.bio = user.getBio();
     }
 }

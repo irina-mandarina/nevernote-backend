@@ -16,4 +16,6 @@ public interface UserService {
     ResponseEntity<String> userDetails(String username);
 
     User findByUsername(String username);
+
+    ResponseEntity<String> setBio(@RequestHeader String username, @RequestBody String bio);
 }
