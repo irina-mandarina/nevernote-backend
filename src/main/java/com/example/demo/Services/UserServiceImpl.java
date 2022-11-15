@@ -1,5 +1,8 @@
 package com.example.demo.Services;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import com.example.demo.Entities.User;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Requests.GET.GetUserDetails;
@@ -60,6 +63,23 @@ public class UserServiceImpl implements UserService {
                     HttpStatus.UNAUTHORIZED
             );
         }
+        // correct username and password
+        try {
+            Algorithm algorithm = Algorithm.HMAC256("hmaKey");
+            String token = JWT.create()
+                    .withIssuer("auth0")
+                    .sign(algorithm);
+        } catch (JWTCreationException exception){
+            // Invalid Signing configuration / Couldn't convert Claims.
+        }
+
+        /*
+        HttpResponse<String> response = Unirest.post("https://dev-vnwxm6hjksh0tszk.us.auth0.com/oauth/token")
+                .header("content-type", "application/x-www-form-urlencoded")
+                .body("grant_type=client_credentials&client_id=%24%7Baccount.clientId%7D&client_secret=YOUR_CLIENT_SECRET&audience=YOUR_API_IDENTIFIER")
+                .asString();
+*/
+
         loggedService.startSession(user);
         return new ResponseEntity<>(
                 HttpStatus.OK
