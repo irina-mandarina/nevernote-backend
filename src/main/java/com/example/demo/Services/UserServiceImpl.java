@@ -64,9 +64,10 @@ public class UserServiceImpl implements UserService {
             );
         }
         // correct username and password
+        String token;
         try {
-            Algorithm algorithm = Algorithm.HMAC256("hmaKey");
-            String token = JWT.create()
+            Algorithm algorithm = Algorithm.RSA256(publicKey, privateKey);
+            token = JWT.create()
                     .withIssuer("auth0")
                     .sign(algorithm);
         } catch (JWTCreationException exception){
@@ -81,9 +82,7 @@ public class UserServiceImpl implements UserService {
 */
 
         loggedService.startSession(user);
-        return new ResponseEntity<>(
-                HttpStatus.OK
-        );
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
     @Override
