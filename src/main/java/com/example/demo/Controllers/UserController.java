@@ -15,6 +15,7 @@ public class UserController {
     @CrossOrigin
     @PostMapping("/auth/register")
     ResponseEntity<String> registerUser(@RequestBody RegistrationRequest registrationRequest) {
+        System.out.println("odbfsirfb");
         return userService.registerUser(registrationRequest);
     }
 

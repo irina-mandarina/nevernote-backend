@@ -1,63 +1,63 @@
 package com.example.demo.JWTconfig;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
-import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import javax.sql.DataSource;
+
+@Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
-    @Value("${auth0.audience}")
-    private String audience;
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private String issuer;
+    @Autowired private JWTAuthenticationEntryPoint authenticationEntryPoint;
+    @Bean
+    public JdbcUserDetailsManager users(DataSource dataSource) {
+        return new JdbcUserDetailsManager(dataSource);
+    }
+
+
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return (web) -> web.ignoring().antMatchers("/auth/login", "/auth/register");
+//    }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        /*
-        This is where we configure the security required for our endpoints and set up our app to serve as
-        an OAuth2 Resource Server, using JWT validation.
-        */
-        http.authorizeRequests()
-//                .antMatchers("/").permitAll()
-//                .antMatchers("/auth").permitAll()
-//                .antMatchers("/notes").authenticated()
-//                .antMatchers("/profile").authenticated()
-//                .antMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
-//                .and().cors()
-//                .and().oauth2ResourceServer().jwt();
-                .mvcMatchers("/auth/**").permitAll()
-                .mvcMatchers("/notes/**").authenticated()
-                .mvcMatchers("/auth/**").authenticated()
-//                .anyRequest()
-//                    .permitAll()
-                    .and()
-                .cors()
-                    .and().oauth2ResourceServer().jwt();
+
+        http.addFilterAfter(
+                new JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeRequests()
+                .antMatchers("/auth/login", "/auth/register").permitAll()
+                .and()
+                .httpBasic();
+                //.authenticationEntryPoint(authenticationEntryPoint);;
+
+
         return http.build();
+
     }
-
     @Bean
-    JwtDecoder jwtDecoder() {
-        /*
-        By default, Spring Security does not validate the "aud" claim of the token,
-        to ensure that this token is indeed intended for our app. Adding our own
-        validator is easy to do:
-        */
-
-        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuer);
-
-        OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(audience);
-        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuer);
-        OAuth2TokenValidator<Jwt> withAudience = new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator);
-
-        jwtDecoder.setJwtValidator(withAudience);
-
-        return jwtDecoder;
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
     }
 }

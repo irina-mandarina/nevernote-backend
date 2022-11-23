@@ -1,28 +1,30 @@
 package com.example.demo.Services;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
 import com.example.demo.Entities.User;
+import com.example.demo.JWTconfig.JWT;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Requests.GET.GetUserDetails;
 import com.example.demo.Requests.POST.LogInRequest;
 import com.example.demo.Requests.POST.RegistrationRequest;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.security.Principal;
 import java.util.Objects;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private static final String JWT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+    private static final int EXPIRY_DAYS = 90;
     private final UserRepository userRepository;
     private final LoggedService loggedService;
 
@@ -48,6 +50,7 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    @SneakyThrows
     @Override
     public ResponseEntity<String> logUser(@RequestBody LogInRequest logInRequest) {
         if (Objects.isNull(findByUsername(logInRequest.getUsername()))) {
@@ -64,22 +67,8 @@ public class UserServiceImpl implements UserService {
             );
         }
         // correct username and password
-        String token;
-        try {
-            Algorithm algorithm = Algorithm.RSA256(publicKey, privateKey);
-            token = JWT.create()
-                    .withIssuer("auth0")
-                    .sign(algorithm);
-        } catch (JWTCreationException exception){
-            // Invalid Signing configuration / Couldn't convert Claims.
-        }
-
-        /*
-        HttpResponse<String> response = Unirest.post("https://dev-vnwxm6hjksh0tszk.us.auth0.com/oauth/token")
-                .header("content-type", "application/x-www-form-urlencoded")
-                .body("grant_type=client_credentials&client_id=%24%7Baccount.clientId%7D&client_secret=YOUR_CLIENT_SECRET&audience=YOUR_API_IDENTIFIER")
-                .asString();
-*/
+        final JWT jwt = new JWT();
+        String token = jwt.generate(user);
 
         loggedService.startSession(user);
         return ResponseEntity.status(HttpStatus.OK).body(token);
@@ -87,14 +76,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> logOut(String username) {
-        loggedService.endSession(findByUsername(username));
+        if (username.isEmpty() || Objects.isNull(findByUsername(username)) ) {
+            return new ResponseEntity<>(
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+        User user = findByUsername(username);
+        loggedService.endSession(user);
+        System.out.println(user.getUsername() + " logged out.");
         return new ResponseEntity<>(
                 HttpStatus.NO_CONTENT
         );
     }
 
     @Override
-    public ResponseEntity<String> userDetails(@RequestHeader String username) {
+    public ResponseEntity<String> userDetails(String username) {
         if (username.isEmpty() || Objects.isNull(findByUsername(username)) ) {
             return new ResponseEntity<>(
                     HttpStatus.UNAUTHORIZED
