@@ -66,11 +66,15 @@ public class NoteServiceImpl implements NoteService {
         Date date = new Date();
         note.setDate(new Timestamp(date.getTime()));
 
-        noteRepository.save(note);
+//        noteRepository.save(note);
 
-        return new ResponseEntity<>(
-                HttpStatus.CREATED
-        );
+        Gson gson = new Gson();
+        final HttpHeaders httpHeaders= new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .headers(httpHeaders)
+                .body(gson.toJson( new GetNote(noteRepository.save(note)) ));
     }
 
     @Override

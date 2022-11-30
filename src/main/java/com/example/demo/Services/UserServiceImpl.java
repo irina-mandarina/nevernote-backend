@@ -9,14 +9,13 @@ import com.example.demo.Requests.POST.RegistrationRequest;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import java.security.Principal;
 import java.util.Objects;
 
 
@@ -27,6 +26,8 @@ public class UserServiceImpl implements UserService {
     private static final int EXPIRY_DAYS = 90;
     private final UserRepository userRepository;
     private final LoggedService loggedService;
+    @Autowired
+    private final JWT jwt;
 
     @Override
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequest registrationRequest) {
@@ -67,7 +68,6 @@ public class UserServiceImpl implements UserService {
             );
         }
         // correct username and password
-        final JWT jwt = new JWT();
         String token = jwt.generate(user);
 
         loggedService.startSession(user);
