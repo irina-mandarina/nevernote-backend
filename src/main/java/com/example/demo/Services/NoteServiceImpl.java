@@ -6,6 +6,8 @@ import com.example.demo.Repositories.NoteRepository;
 import com.example.demo.Requests.GET.GetNote;
 import com.example.demo.Requests.GET.GetNotes;
 import com.example.demo.Requests.POST.NoteRequest;
+import com.example.demo.types.NoteType;
+import com.example.demo.types.Privacy;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -34,11 +36,23 @@ public class NoteServiceImpl implements NoteService {
         return username.isEmpty() || (userService.findByUsername(username) == null) || !loggedService.isLogged(userService.findByUsername(username));
     }
     @Override
-    public ResponseEntity<String> getNotes(@RequestHeader String username) {
+    public ResponseEntity<String> getNotes(@RequestHeader String username, NoteType noteType) {
         if (unauthorized(username)) {
             return new ResponseEntity<>(
                     HttpStatus.UNAUTHORIZED
             );
+        }
+
+        User user = userService.findByUsername(username);
+        Timestamp now = new Timestamp((new Date()).getTime());
+        List<Note> notes;
+
+        switch (noteType) {
+            case TODO -> notes = findAllByUserAndCompletedFalseAndDeadlineAfter(user, now);
+            case NOTES -> notes = findAllByUserAndDeadlineIsNull(user);
+            case TASKS -> notes = findAllByUserAndDeadlineIsNotNull(user);
+            case COMPLETED -> notes = findAllByUserAndDeadlineIsNotNullAndCompletedTrue(user);
+            default -> notes = findAllByUser(user);
         }
 
         final HttpHeaders httpHeaders= new HttpHeaders();
@@ -48,7 +62,7 @@ public class NoteServiceImpl implements NoteService {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .headers(httpHeaders)
-                .body(gson.toJson( new GetNotes( findAllByUser(userService.findByUsername(username)) )));
+                .body(gson.toJson( new GetNotes( notes )));
     }
 
     @Override
@@ -62,11 +76,12 @@ public class NoteServiceImpl implements NoteService {
         note.setContent(noteRequest.getContent());
         note.setTitle(noteRequest.getTitle());
         note.setUser(userService.findByUsername(username));
+        if (!Objects.isNull(noteRequest.getDeadline())) {
+            note.setDeadline(noteRequest.getDeadline());
+        }
 
         Date date = new Date();
         note.setDate(new Timestamp(date.getTime()));
-
-//        noteRepository.save(note);
 
         Gson gson = new Gson();
         final HttpHeaders httpHeaders= new HttpHeaders();
@@ -95,6 +110,9 @@ public class NoteServiceImpl implements NoteService {
 
         note.setContent(noteRequest.getContent());
         note.setTitle(noteRequest.getTitle());
+        if (!Objects.isNull(noteRequest.getDeadline())) {
+            note.setDeadline(noteRequest.getDeadline());
+        }
 
         noteRepository.save(note);
 
@@ -132,8 +150,73 @@ public class NoteServiceImpl implements NoteService {
         );
     }
 
+    @Override
+    public ResponseEntity<String> completeTask(Long id, String username) {
+        if (unauthorized(username)) {
+            return new ResponseEntity<>(
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+        Note note = noteRepository.findNoteById(id);
+
+        if (note == null || !Objects.equals(note.getUser().getUsername(), username)) {
+            return new ResponseEntity<>(
+                    HttpStatus.NOT_FOUND
+            );
+        }
+
+        note.setCompleted(!note.getCompleted());
+        noteRepository.save(note);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        (new Gson()).toJson(new GetNote(note))
+                );
+    }
+
+    @Override
+    public ResponseEntity<String> getNote(String username, Long id) {
+        if (unauthorized(username)) {
+            return new ResponseEntity<>(
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+        Note note = noteRepository.findNoteById(id);
+
+        if (note == null || !Objects.equals(note.getUser().getUsername(), username)) {
+            return new ResponseEntity<>(
+                    HttpStatus.NOT_FOUND
+            );
+        }
+
+        if (!Objects.equals(note.getUser().getUsername(), username) && note.getPrivacy().equals(Privacy.PRIVATE)) {
+            return new ResponseEntity<>(
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        (new Gson()).toJson(new GetNote(note))
+                );
+    }
+
     private List<Note> findAllByUser(User user) {
         return noteRepository.findAllByUser(user);
+    }
+
+    private List<Note> findAllByUserAndDeadlineIsNull(User user) {
+        return noteRepository.findAllByUserAndDeadlineIsNull(user);
+    }
+    private List<Note> findAllByUserAndDeadlineIsNotNull(User user) {
+        return noteRepository.findAllByUserAndDeadlineIsNotNull(user);
+    }
+    private List<Note> findAllByUserAndCompletedFalseAndDeadlineAfter(User user, Timestamp now) {
+        return noteRepository.findAllByUserAndCompletedFalseAndDeadlineAfter(user, now);
+    }
+
+    private List<Note> findAllByUserAndDeadlineIsNotNullAndCompletedTrue(User user) {
+        return noteRepository.findAllByUserAndDeadlineIsNotNullAndCompletedTrue(user);
     }
 
     private Note findNoteById(Long id) {
