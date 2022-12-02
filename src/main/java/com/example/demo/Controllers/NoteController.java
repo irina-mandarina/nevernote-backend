@@ -14,7 +14,7 @@ public class NoteController {
     NoteService noteService;
 
     @GetMapping("/notes")
-    ResponseEntity<String> getNotes(@RequestHeader String username, @PathVariable("note-type") NoteType noteType) {
+    ResponseEntity<String> getNotes(@RequestHeader String username, @RequestParam NoteType noteType) {
         return noteService.getNotes(username, noteType);
     }
 
