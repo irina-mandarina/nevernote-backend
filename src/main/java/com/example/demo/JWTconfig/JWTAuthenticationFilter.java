@@ -2,15 +2,11 @@ package com.example.demo.JWTconfig;
 
 import com.example.demo.Services.LoggedService;
 import com.example.demo.Services.UserService;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,14 +23,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isValid(String token) throws JSONException, IllegalArgumentException {
 
-        String[] chunks = token.split("\\.");
-
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-
-        //String header = new String(decoder.decode(chunks[0]));
-        JSONObject payload = new JSONObject(new String(decoder.decode(chunks[1])));
-        String sub = (String) payload.get("sub");
-        int exp = (int) payload.get("exp");
+        String sub = getSub(token);
+        int exp = getExp(token);
 
         // if not expired
         if ((exp) > (new Date().getTime() / 1000)) {
@@ -43,6 +33,20 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return false;
+    }
+
+    private String getSub(String token) throws JSONException {
+        String[] chunks = token.split("\\.");
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        JSONObject payload = new JSONObject(new String(decoder.decode(chunks[1])));
+        return (String) payload.get("sub");
+    }
+
+    private int getExp(String token) throws JSONException {
+        String[] chunks = token.split("\\.");
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        JSONObject payload = new JSONObject(new String(decoder.decode(chunks[1])));
+        return (int) payload.get("exp");
     }
 
     @Override
@@ -58,24 +62,22 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         if (authorizationHeaderValue != null && authorizationHeaderValue.startsWith("Bearer")) {
             token = authorizationHeaderValue.substring(7);
-            System.out.println(token);
-            boolean tokenIsValid = false;
+            System.out.println("token: " + token);
+            boolean tokenIsValid;
+
             try {
                 tokenIsValid = isValid(token);
-            }
-            catch (JSONException e) {
+            } catch (JSONException e) {
                 System.out.println("JSONException: Problematic payload");
                 response.setStatus(
                         HttpServletResponse.SC_UNAUTHORIZED);
                 return;
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 System.out.println("IllegalArgumentException: Invalid payload");
                 response.setStatus(
                         HttpServletResponse.SC_UNAUTHORIZED);
                 return;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 System.out.println("Exception: Could not validate token");
                 response.setStatus(
                         HttpServletResponse.SC_UNAUTHORIZED);
@@ -83,11 +85,19 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             }
 
             if (tokenIsValid) {
-                System.out.println("JWT is valid.");
+                try {
+                    System.out.println("JWT is valid. From: " + request.getRequestURI());
+                    request.setAttribute("username", getSub(token));
+                    System.out.println("attr for " + request.getRequestURI() + ": " + request.getAttribute("username"));
+                    request.getRequestURI();
+                } catch (JSONException e) {
+                    System.out.println("IllegalArgumentException: Invalid payload - cannot extract sub");
+                    response.setStatus(
+                            HttpServletResponse.SC_UNAUTHORIZED);
+                }
                 filterChain.doFilter(request, response);
                 return;
-            }
-            else {
+            } else {
                 System.out.println("JWT is invalid.");
             }
         }

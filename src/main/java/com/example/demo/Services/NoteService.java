@@ -15,4 +15,6 @@ public interface NoteService {
     ResponseEntity<String> deleteNote(@PathVariable Long id, @RequestHeader String username);
     ResponseEntity<String> completeTask(Long id, String username);
     ResponseEntity<String> getNote(String username, Long id);
+
+    ResponseEntity<String> togglePrivacy(Long id, String username);
 }

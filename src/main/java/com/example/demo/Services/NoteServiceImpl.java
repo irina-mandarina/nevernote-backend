@@ -79,6 +79,7 @@ public class NoteServiceImpl implements NoteService {
         if (!Objects.isNull(noteRequest.getDeadline())) {
             note.setDeadline(noteRequest.getDeadline());
         }
+        note.setPrivacy(noteRequest.getPrivacy());
 
         Date date = new Date();
         note.setDate(new Timestamp(date.getTime()));
@@ -183,7 +184,7 @@ public class NoteServiceImpl implements NoteService {
         }
         Note note = noteRepository.findNoteById(id);
 
-        if (note == null || !Objects.equals(note.getUser().getUsername(), username)) {
+        if (note == null) {
             return new ResponseEntity<>(
                     HttpStatus.NOT_FOUND
             );
@@ -194,6 +195,41 @@ public class NoteServiceImpl implements NoteService {
                     HttpStatus.FORBIDDEN
             );
         }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        (new Gson()).toJson(new GetNote(note))
+                );
+    }
+
+    @Override
+    public ResponseEntity<String> togglePrivacy(Long id, String username) {
+        if (unauthorized(username)) {
+            return new ResponseEntity<>(
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+        Note note = noteRepository.findNoteById(id);
+
+        if (note == null) {
+            return new ResponseEntity<>(
+                    HttpStatus.NOT_FOUND
+            );
+        }
+
+        if (!Objects.equals(note.getUser().getUsername(), username) && note.getPrivacy().equals(Privacy.PRIVATE)) {
+            return new ResponseEntity<>(
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        if (note.getPrivacy() == Privacy.PRIVATE) {
+            note.setPrivacy(Privacy.PUBLIC);
+        }
+        else {
+            note.setPrivacy(Privacy.PRIVATE);
+        }
+        noteRepository.save(note);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(

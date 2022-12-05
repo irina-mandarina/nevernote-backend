@@ -24,17 +24,17 @@ public class UserController {
     }
 
     @PostMapping(("/auth/logout"))
-    ResponseEntity<String> logOut(@RequestHeader String username) {
+    ResponseEntity<String> logOut(@RequestAttribute String username) {
         return userService.logOut(username);
     }
 
     @GetMapping("/profile/details")
-    ResponseEntity<String> userDetails(@RequestHeader String username) {
+    ResponseEntity<String> userDetails(@RequestAttribute String username) {
         return userService.userDetails(username);
     }
 
     @PutMapping("/profile/set-bio")
-    ResponseEntity<String> setBio(@RequestHeader String username, @RequestBody String newBio) {
+    ResponseEntity<String> setBio(@RequestAttribute String username, @RequestBody String newBio) {
         return userService.setBio(username, newBio);
     }
 }
