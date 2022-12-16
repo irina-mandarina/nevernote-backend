@@ -3,9 +3,9 @@ package com.example.demo.Services;
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
 import com.example.demo.Repositories.NoteRepository;
-import com.example.demo.Requests.GET.GetNote;
-import com.example.demo.Requests.GET.GetNotes;
-import com.example.demo.Requests.POST.NoteRequest;
+import com.example.demo.models.GET.NoteResponse;
+import com.example.demo.models.GET.GetNotes;
+import com.example.demo.models.POST.NoteRequest;
 import com.example.demo.types.NoteType;
 import com.example.demo.types.Privacy;
 import com.google.gson.Gson;
@@ -37,12 +37,6 @@ public class NoteServiceImpl implements NoteService {
     }
     @Override
     public ResponseEntity<String> getNotes(@RequestHeader String username, NoteType noteType) {
-        if (unauthorized(username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
-
         User user = userService.findByUsername(username);
         Timestamp now = new Timestamp((new Date()).getTime());
         List<Note> notes;
@@ -67,11 +61,6 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public ResponseEntity<String> addNote(@RequestHeader String username, @RequestBody NoteRequest noteRequest) {
-        if (unauthorized(username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
         Note note = new Note();
         note.setContent(noteRequest.getContent());
         note.setTitle(noteRequest.getTitle());
@@ -90,16 +79,11 @@ public class NoteServiceImpl implements NoteService {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .headers(httpHeaders)
-                .body(gson.toJson( new GetNote(noteRepository.save(note)) ));
+                .body(gson.toJson( new NoteResponse(noteRepository.save(note)) ));
     }
 
     @Override
     public ResponseEntity<String> editNote(@PathVariable Long id, @RequestHeader String username, @RequestBody NoteRequest noteRequest) {
-        if (unauthorized(username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
 
         Note note = findNoteById(id);
 
@@ -125,17 +109,11 @@ public class NoteServiceImpl implements NoteService {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .headers(httpHeaders)
-                .body(gson.toJson( new GetNote(note) ));
+                .body(gson.toJson( new NoteResponse(note) ));
     }
 
     @Override
     public ResponseEntity<String> deleteNote(@PathVariable Long id, @RequestHeader String username) {
-        if (unauthorized(username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
-
         Note note = noteRepository.findNoteById(id);
 
         if (note == null || !Objects.equals(note.getUser().getUsername(), username)) {
@@ -153,11 +131,6 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public ResponseEntity<String> completeTask(Long id, String username) {
-        if (unauthorized(username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
         Note note = noteRepository.findNoteById(id);
 
         if (note == null || !Objects.equals(note.getUser().getUsername(), username)) {
@@ -171,17 +144,12 @@ public class NoteServiceImpl implements NoteService {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
-                        (new Gson()).toJson(new GetNote(note))
+                        (new Gson()).toJson(new NoteResponse(note))
                 );
     }
 
     @Override
     public ResponseEntity<String> getNote(String username, Long id) {
-        if (unauthorized(username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
         Note note = noteRepository.findNoteById(id);
 
         if (note == null) {
@@ -198,17 +166,12 @@ public class NoteServiceImpl implements NoteService {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
-                        (new Gson()).toJson(new GetNote(note))
+                        (new Gson()).toJson(new NoteResponse(note))
                 );
     }
 
     @Override
     public ResponseEntity<String> togglePrivacy(Long id, String username) {
-        if (unauthorized(username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
         Note note = noteRepository.findNoteById(id);
 
         if (note == null) {
@@ -233,29 +196,35 @@ public class NoteServiceImpl implements NoteService {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
-                        (new Gson()).toJson(new GetNote(note))
+                        (new Gson()).toJson(new NoteResponse(note))
                 );
     }
 
-    private List<Note> findAllByUser(User user) {
+    @Override
+    public List<Note> findAllByUser(User user) {
         return noteRepository.findAllByUser(user);
     }
 
-    private List<Note> findAllByUserAndDeadlineIsNull(User user) {
+    @Override
+    public List<Note> findAllByUserAndDeadlineIsNull(User user) {
         return noteRepository.findAllByUserAndDeadlineIsNull(user);
     }
-    private List<Note> findAllByUserAndDeadlineIsNotNull(User user) {
+    @Override
+    public List<Note> findAllByUserAndDeadlineIsNotNull(User user) {
         return noteRepository.findAllByUserAndDeadlineIsNotNull(user);
     }
-    private List<Note> findAllByUserAndCompletedFalseAndDeadlineAfter(User user, Timestamp now) {
+    @Override
+    public List<Note> findAllByUserAndCompletedFalseAndDeadlineAfter(User user, Timestamp now) {
         return noteRepository.findAllByUserAndCompletedFalseAndDeadlineAfter(user, now);
     }
 
-    private List<Note> findAllByUserAndDeadlineIsNotNullAndCompletedTrue(User user) {
+    @Override
+    public List<Note> findAllByUserAndDeadlineIsNotNullAndCompletedTrue(User user) {
         return noteRepository.findAllByUserAndDeadlineIsNotNullAndCompletedTrue(user);
     }
 
-    private Note findNoteById(Long id) {
+    @Override
+    public Note findNoteById(Long id) {
         return noteRepository.findNoteById(id);
     }
 }

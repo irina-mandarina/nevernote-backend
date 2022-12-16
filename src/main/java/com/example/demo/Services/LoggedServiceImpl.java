@@ -17,7 +17,6 @@ public class LoggedServiceImpl implements LoggedService {
 
     @Override
     public boolean isLogged(User user) {
-
         return (loggedRepository.findByUser(user).isValidSession());
     }
 

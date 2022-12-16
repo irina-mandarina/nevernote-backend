@@ -1,4 +1,4 @@
-package com.example.demo.Requests.POST;
+package com.example.demo.models.POST;
 
 import lombok.Getter;
 

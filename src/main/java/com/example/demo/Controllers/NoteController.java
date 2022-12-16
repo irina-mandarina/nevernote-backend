@@ -1,7 +1,9 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Requests.POST.NoteRequest;
+import com.example.demo.Services.LogService;
+import com.example.demo.models.POST.NoteRequest;
 import com.example.demo.Services.NoteService;
+import com.example.demo.types.Method;
 import com.example.demo.types.NoteType;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,39 +14,54 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class NoteController {
     NoteService noteService;
+    LogService logService;
 
     @GetMapping("/notes")
     ResponseEntity<String> getNotes(@RequestAttribute String username, @RequestParam NoteType noteType) {
-        return noteService.getNotes(username, noteType);
+        ResponseEntity<String> response = noteService.getNotes(username, noteType);
+        logService.log(response, username, Method.GET, "/notes");
+        return response;
     }
 
     @PostMapping("/notes")
     ResponseEntity<String> addNote(@RequestAttribute String username, @RequestBody NoteRequest noteRequest) {
-        return noteService.addNote(username, noteRequest);
+        ResponseEntity<String> response = noteService.addNote(username, noteRequest);
+        logService.log(response, username, Method.POST, "/notes");
+        return response;
     }
 
     @GetMapping("/notes/{id}")
     ResponseEntity<String> getNotes(@RequestAttribute String username, @PathVariable("id") Long id) {
-        return noteService.getNote(username, id);
+        ResponseEntity<String> response = noteService.getNote(username, id);
+        logService.log(response, username, Method.GET, "/notes/" + id);
+        return response;
     }
 
     @PutMapping("/notes/{id}")
     ResponseEntity<String> editNote(@PathVariable("id") Long id, @RequestAttribute String username, @RequestBody NoteRequest noteRequest) {
-        return noteService.editNote(id, username, noteRequest);
+        ResponseEntity<String> response = noteService.editNote(id, username, noteRequest);
+        logService.log(response, username, Method.PUT, "/notes/" + id);
+        return response;
     }
 
     @DeleteMapping("/notes/{id}")
     ResponseEntity<String> deleteNote(@PathVariable("id") Long id, @RequestAttribute String username) {
-        return noteService.deleteNote(id, username);
+        ResponseEntity<String> response = noteService.deleteNote(id, username);
+        logService.log(response, username, Method.DELETE, "/notes/" + id);
+        return response;
     }
 
     @PutMapping("/notes/{id}/completed")
     ResponseEntity<String> completeTask(@PathVariable("id") Long id, @RequestAttribute String username) {
-        return noteService.completeTask(id, username);
+        ResponseEntity<String> response = noteService.completeTask(id, username);
+        logService.log(response, username, Method.PUT, "/notes/" + id.toString() + "/completed");
+        return response;
     }
 
     @PutMapping("/notes/{id}/privacy")
     ResponseEntity<String> togglePrivacy(@PathVariable("id") Long id, @RequestAttribute String username) {
-        return noteService.togglePrivacy(id, username);
+        ResponseEntity<String> response = noteService.togglePrivacy(id, username);
+        logService.log(response, username, Method.PUT, "/notes/" + id.toString() + "/privacy");
+        return response;
     }
 }

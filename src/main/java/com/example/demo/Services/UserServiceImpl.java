@@ -3,13 +3,12 @@ package com.example.demo.Services;
 import com.example.demo.Entities.User;
 import com.example.demo.JWTconfig.JWT;
 import com.example.demo.Repositories.UserRepository;
-import com.example.demo.Requests.GET.GetUserDetails;
-import com.example.demo.Requests.POST.LogInRequest;
-import com.example.demo.Requests.POST.RegistrationRequest;
+import com.example.demo.models.GET.UserDetailsResponse;
+import com.example.demo.models.POST.LogInRequest;
+import com.example.demo.models.POST.RegistrationRequest;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,11 +21,9 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private static final String JWT_HEADER = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
-    private static final int EXPIRY_DAYS = 90;
     private final UserRepository userRepository;
     private final LoggedService loggedService;
-    @Autowired
+
     private final JWT jwt;
 
     @Override
@@ -76,11 +73,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> logOut(String username) {
-        if (username.isEmpty() || Objects.isNull(findByUsername(username)) ) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
         User user = findByUsername(username);
         loggedService.endSession(user);
         System.out.println(user.getUsername() + " logged out.");
@@ -91,14 +83,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> userDetails(String username) {
-        if (username.isEmpty() || Objects.isNull(findByUsername(username)) ) {
-            return new ResponseEntity<>(
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
-
         User user = findByUsername(username);
-        GetUserDetails userDetails = new GetUserDetails(user);
+        UserDetailsResponse userDetails = new UserDetailsResponse(user);
 
         final HttpHeaders httpHeaders= new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
