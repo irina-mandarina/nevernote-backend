@@ -42,15 +42,19 @@ public class PermissionServiceImpl implements PermissionService {
         User user = userService.findByUsername(permissionRequest.getUsername());
         Note note = noteService.findNoteById(permissionRequest.getNoteId());
 
-        if (Objects.isNull(user) || Objects.isNull(note)) {
+        System.out.printf(granter.getUsername());
+        System.out.printf(user.getUsername());
+        System.out.printf(note.getTitle());
+
+        if (Objects.isNull(user) || Objects.isNull(note) || Objects.isNull(granter)) {
             // username or note does not exist
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
-//        if (!note.getUser().getUsername().equals(owner.getUsername())) {
-//            // owner is not the owner of the note
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-//        }
+        if (!note.getUser().getUsername().equals(granter.getUsername())) {
+            // granter is not the owner of the note
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
 
         Permission permission = new Permission();
         permission.setPermissionType(permissionRequest.getPermissionType());
@@ -69,8 +73,8 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public ResponseEntity<String> deletePermission(String username, PermissionRequest permissionRequest) {
         List<Permission> permissions = findAllByUserUsernameAndNoteId(permissionRequest.getUsername(), permissionRequest.getNoteId());
-        Gson gson = new Gson();
-        User granter = userService.findByUsername(permissionRequest.getOwnerUsername());
+
+        User granter = userService.findByUsername(username);
         User user = userService.findByUsername(permissionRequest.getUsername()); // the one who receives the permission
         Note note = noteService.findNoteById(permissionRequest.getNoteId());
 
@@ -116,16 +120,16 @@ public class PermissionServiceImpl implements PermissionService {
                 }
                 // grant missing permissions
                 if (!existingPermissionTypes.contains(Method.POST)) {
-                    grantPermission(username, new PermissionRequest(username, username, Method.POST, noteId));
+                    grantPermission(username, new PermissionRequest(username, Method.POST, noteId));
                 }
                 if (!existingPermissionTypes.contains(Method.GET)) {
-                    grantPermission(username, new PermissionRequest(username, username, Method.GET, noteId));
+                    grantPermission(username, new PermissionRequest(username, Method.GET, noteId));
                 }
                 if (!existingPermissionTypes.contains(Method.PUT)) {
-                    grantPermission(username, new PermissionRequest(username, username, Method.PUT, noteId));
+                    grantPermission(username, new PermissionRequest(username, Method.PUT, noteId));
                 }
                 if (!existingPermissionTypes.contains(Method.DELETE)) {
-                    grantPermission(username, new PermissionRequest(username, username, Method.DELETE, noteId));
+                    grantPermission(username, new PermissionRequest(username, Method.DELETE, noteId));
                 }
 
                 // if the owner of the note requests the permissions, he should get all of them

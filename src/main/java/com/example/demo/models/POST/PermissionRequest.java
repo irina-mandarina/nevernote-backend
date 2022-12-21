@@ -10,16 +10,13 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 public class PermissionRequest {
-    Long id;
-    String ownerUsername;
     Timestamp grantedTimestamp;
     String username;
     Method permissionType;
     Long noteId;
 
-    public PermissionRequest(String username, String ownerUsername, Method permissionType, Long noteId) {
+    public PermissionRequest(String username, Method permissionType, Long noteId) {
         this.username = username;
-        this.ownerUsername = ownerUsername;
         this.noteId = noteId;
         this.permissionType = permissionType;
     }
@@ -28,5 +25,6 @@ public class PermissionRequest {
         this.permissionType = permission.getPermissionType();
         this.noteId = permission.getNote().getId();
         this.username = permission.getUser().getUsername();
+        this.grantedTimestamp = permission.getGrantedTimestamp();
     }
 }
