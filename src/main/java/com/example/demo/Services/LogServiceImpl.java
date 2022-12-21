@@ -68,7 +68,8 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
-    public void log(ResponseEntity<String> response, String username, Method methodType, String path) {
+    public void log(ResponseEntity<String> response, String username,
+                    Method methodType, String path) {
         if (!Arrays.asList(200, 201, 204).contains(response.getStatusCode().value())) {
             return;
         }
@@ -100,22 +101,17 @@ public class LogServiceImpl implements LogService {
                 NoteResponse noteResponse = gson.fromJson(response.getBody(), NoteResponse.class);
                 log.setSubjectId(noteResponse.getId());
             }
-        }
-        else if (path.contains("bio")) {
+        } else if (path.contains("bio")) {
             log.setSubject(username);
             subjectParam = "'s bio";
-        }
-        else if (path.contains("details")) {
+        } else if (path.contains("details")) {
             log.setSubject(username);
             subjectParam = "'s details";
-        }
-        else if (path.contains("register")) {
+        } else if (path.contains("register")) {
             log.setSubject("registered");
-        }
-        else if (path.contains("login")) {
+        } else if (path.contains("login")) {
             log.setSubject("logged in");
-        }
-        else if (path.contains("logout")) {
+        } else if (path.contains("logout")) {
             log.setSubject("logged out");
         }
 
@@ -140,7 +136,6 @@ public class LogServiceImpl implements LogService {
 
         log.setMessage(message + ".");
         logsRepository.save(log);
+
     }
-
-
 }

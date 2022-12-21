@@ -54,14 +54,14 @@ public class NoteController {
     @PutMapping("/notes/{id}/completed")
     ResponseEntity<String> completeTask(@PathVariable("id") Long id, @RequestAttribute String username) {
         ResponseEntity<String> response = noteService.completeTask(id, username);
-        logService.log(response, username, Method.PUT, "/notes/" + id.toString() + "/completed");
+        logService.log(response, username, Method.PUT, "/notes/" + id + "/completed");
         return response;
     }
 
     @PutMapping("/notes/{id}/privacy")
     ResponseEntity<String> togglePrivacy(@PathVariable("id") Long id, @RequestAttribute String username) {
         ResponseEntity<String> response = noteService.togglePrivacy(id, username);
-        logService.log(response, username, Method.PUT, "/notes/" + id.toString() + "/privacy");
+        logService.log(response, username, Method.PUT, "/notes/" + id + "/privacy");
         return response;
     }
 }
