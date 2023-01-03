@@ -34,4 +34,16 @@ public interface NoteService {
     List<Note> findAllByUserAndDeadlineIsNotNullAndCompletedTrue(User user);
 
     Note findNoteById(Long id);
+
+    List<Note> findAll();
+
+    List<Note> findAllByDeadlineIsNull();
+
+    List<Note> findAllByDeadlineIsNotNull();
+
+    List<Note> findAllByCompletedFalseAndDeadlineAfter(Timestamp now);
+
+    List<Note> findAllByDeadlineIsNotNullAndDeadlineBefore(Timestamp now);
+
+    List<Note> findAllByDeadlineIsNotNullAndCompletedTrue();
 }

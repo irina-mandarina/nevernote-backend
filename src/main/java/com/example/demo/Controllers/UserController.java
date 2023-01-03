@@ -44,10 +44,10 @@ public class UserController {
         return response;
     }
 
-    @PutMapping("/profile/set-bio")
+    @PutMapping("/profile/bio")
     ResponseEntity<String> setBio(@RequestAttribute String username, @RequestBody String newBio) {
         ResponseEntity<String> response = userService.setBio(username, newBio);
-        logService.log(response, username, Method.PUT, "/profile/set-bio");
+        logService.log(response, username, Method.PUT, "/profile/bio");
         return response;
     }
 }

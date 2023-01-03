@@ -7,6 +7,7 @@ import com.example.demo.Repositories.PermissionRepository;
 import com.example.demo.models.GET.NoteResponse;
 import com.example.demo.models.GET.GetNotes;
 import com.example.demo.models.POST.NoteRequest;
+import com.example.demo.types.AuthorityType;
 import com.example.demo.types.Method;
 import com.example.demo.types.NoteType;
 import com.example.demo.types.Privacy;
@@ -33,6 +34,7 @@ public class NoteServiceImpl implements NoteService {
     private final PermissionRepository permissionRepository;
     private final UserService userService;
     private final LoggedService loggedService;
+    private final AuthorityService authorityService;
 
     boolean unauthorized(String username) {
         return username.isEmpty() || (userService.findByUsername(username) == null) || !loggedService.isLogged(userService.findByUsername(username));
@@ -40,15 +42,28 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public ResponseEntity<String> getNotes(@RequestHeader String username, NoteType noteType) {
         User user = userService.findByUsername(username);
+
         Timestamp now = new Timestamp((new Date()).getTime());
         List<Note> notes;
 
-        switch (noteType) {
-            case TODO -> notes = findAllByUserAndCompletedFalseAndDeadlineAfter(user, now);
-            case NOTES -> notes = findAllByUserAndDeadlineIsNull(user);
-            case TASKS -> notes = findAllByUserAndDeadlineIsNotNull(user);
-            case COMPLETED -> notes = findAllByUserAndDeadlineIsNotNullAndCompletedTrue(user);
-            default -> notes = findAllByUser(user);
+        if (authorityService.hasRole(username, AuthorityType.ADMIN)) {
+            switch (noteType) {
+                case TODO -> notes = findAllByCompletedFalseAndDeadlineAfter(now);
+                case NOTES -> notes = findAllByDeadlineIsNull();
+                case TASKS -> notes = findAllByDeadlineIsNotNull();
+                case COMPLETED -> notes = findAllByDeadlineIsNotNullAndCompletedTrue();
+                default -> notes = findAll();
+            }
+        }
+
+        else {
+            switch (noteType) {
+                case TODO -> notes = findAllByUserAndCompletedFalseAndDeadlineAfter(user, now);
+                case NOTES -> notes = findAllByUserAndDeadlineIsNull(user);
+                case TASKS -> notes = findAllByUserAndDeadlineIsNotNull(user);
+                case COMPLETED -> notes = findAllByUserAndDeadlineIsNotNullAndCompletedTrue(user);
+                default -> notes = findAllByUser(user);
+            }
         }
 
         final HttpHeaders httpHeaders= new HttpHeaders();
@@ -63,6 +78,9 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public ResponseEntity<String> addNote(@RequestHeader String username, @RequestBody NoteRequest noteRequest) {
+        if (authorityService.hasRole(username, AuthorityType.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
         Note note = new Note();
         note.setContent(noteRequest.getContent());
         note.setTitle(noteRequest.getTitle());
@@ -236,5 +254,35 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public Note findNoteById(Long id) {
         return noteRepository.findNoteById(id);
+    }
+
+
+    @Override
+    public List<Note> findAll() {
+        return noteRepository.findAll();
+    }
+    @Override
+    public List<Note> findAllByDeadlineIsNull() {
+        return noteRepository.findAllByDeadlineIsNull();
+    }
+
+    @Override
+    public List<Note> findAllByDeadlineIsNotNull() {
+        return noteRepository.findAllByDeadlineIsNull();
+    }
+
+    @Override
+    public List<Note> findAllByCompletedFalseAndDeadlineAfter(Timestamp now) {
+        return noteRepository.findAllByCompletedFalseAndDeadlineAfter(now);
+    }
+
+    @Override
+    public List<Note> findAllByDeadlineIsNotNullAndDeadlineBefore(Timestamp now) {
+        return noteRepository.findAllByDeadlineIsNotNullAndDeadlineBefore(now);
+    }
+
+    @Override
+    public List<Note> findAllByDeadlineIsNotNullAndCompletedTrue() {
+        return noteRepository.findAllByDeadlineIsNotNullAndCompletedTrue();
     }
 }
