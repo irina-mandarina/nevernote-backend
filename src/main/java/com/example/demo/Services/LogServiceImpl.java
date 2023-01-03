@@ -5,6 +5,7 @@ import com.example.demo.Entities.User;
 import com.example.demo.Repositories.LogsRepository;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.models.GET.NoteResponse;
+import com.example.demo.models.POST.PermissionRequest;
 import com.example.demo.types.Method;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +71,12 @@ public class LogServiceImpl implements LogService {
     @Override
     public void log(ResponseEntity<String> response, String username,
                     Method methodType, String path) {
+        // if the request is not successful, don't log it
         if (!Arrays.asList(200, 201, 204).contains(response.getStatusCode().value())) {
+            return;
+        }
+        if (path.contains("permissions")) {
+            logPermission(response, username, methodType, path);
             return;
         }
         Log log = new Log();
@@ -137,5 +143,46 @@ public class LogServiceImpl implements LogService {
         log.setMessage(message + ".");
         logsRepository.save(log);
 
+    }
+
+    public void logPermission(ResponseEntity<String> response, String username,
+                              Method methodType, String path) {
+        Log log = new Log();
+        log.setPath(path);
+        log.setUser(userService.findByUsername(username));
+        log.setMethod(methodType);
+        log.setTimestamp(new Timestamp(new Date().getTime()));
+
+        String message = username + " ";
+
+        // get the note id from path because it's easier and using gson is unnecessary
+        Long noteId = Long.valueOf(path.split("/")[2]);
+        String permittedUsername = path
+                .replace("?", "/")
+                .split("/")
+                [path.replace("?", "/").split("/").length - 1] ;
+        String permissionType = path
+                .replace("?", "/")
+                .split("/")
+                [path.replace("?", "/").split("/").length - 2];
+
+        if (methodType.equals(Method.GET)) {
+            message += "retrieved ";
+            message += "note " + noteId + " permissions";
+        }
+        else if (methodType.equals(Method.DELETE)) {
+            message += "removed ";
+            message += permittedUsername + "'s " + permissionType
+                    + " permission for " + "note " + noteId;
+        }
+        else if (methodType.equals(Method.POST)) {
+            message += "granted ";
+            message += permittedUsername + " a " + permissionType
+                    + " permission for " + "note " + noteId;
+        }
+        log.setSubjectId(noteId);
+        log.setSubject("note permissions");
+        log.setMessage(message);
+        logsRepository.save(log);
     }
 }

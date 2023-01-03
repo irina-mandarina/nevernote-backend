@@ -3,9 +3,11 @@ package com.example.demo.Services;
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
 import com.example.demo.Repositories.NoteRepository;
+import com.example.demo.Repositories.PermissionRepository;
 import com.example.demo.models.GET.NoteResponse;
 import com.example.demo.models.GET.GetNotes;
 import com.example.demo.models.POST.NoteRequest;
+import com.example.demo.types.Method;
 import com.example.demo.types.NoteType;
 import com.example.demo.types.Privacy;
 import com.google.gson.Gson;
@@ -28,7 +30,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class NoteServiceImpl implements NoteService {
     private final NoteRepository noteRepository;
-
+    private final PermissionRepository permissionRepository;
     private final UserService userService;
     private final LoggedService loggedService;
 
@@ -158,10 +160,18 @@ public class NoteServiceImpl implements NoteService {
             );
         }
 
-        if (!Objects.equals(note.getUser().getUsername(), username) && note.getPrivacy().equals(Privacy.PRIVATE)) {
-            return new ResponseEntity<>(
-                    HttpStatus.FORBIDDEN
-            );
+        // if the note is private
+        if (note.getPrivacy().equals(Privacy.PRIVATE)) {
+            // if the requester is not the owner of the note
+            // ,and he does not have a read permission
+            if (!Objects.equals(note.getUser().getUsername(), username) &&
+                   Objects.isNull( permissionRepository.findPermissionByNoteIdAndUserUsernameAndPermissionType(
+                           note.getId(), username, Method.GET
+                   ) )) {
+                return new ResponseEntity<>(
+                        HttpStatus.FORBIDDEN
+                );
+            }
         }
 
         return ResponseEntity.status(HttpStatus.OK)

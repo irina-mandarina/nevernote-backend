@@ -27,4 +27,8 @@ public class PermissionRequest {
         this.username = permission.getUser().getUsername();
         this.grantedTimestamp = permission.getGrantedTimestamp();
     }
+
+    public PermissionRequest() {
+
+    }
 }
