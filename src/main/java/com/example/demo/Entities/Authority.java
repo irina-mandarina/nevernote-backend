@@ -1,11 +1,15 @@
 package com.example.demo.Entities;
 
 import com.example.demo.types.AuthorityType;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "authorities")
 public class Authority {
     @Id
@@ -13,12 +17,12 @@ public class Authority {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @NotNull
     private User user;
 
-    @Column(name = "authority")
+    @Column(name = "role")
     @NotNull
-    private AuthorityType authority;
+    private AuthorityType role;
 }

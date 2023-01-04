@@ -39,13 +39,15 @@ public class User {
     private String bio;
 
     @OneToMany
-    @JsonIgnore
     @JoinColumn(name = "user_id")
     private List<Note> notes;
 
     @OneToOne(mappedBy = "user")
-    @JsonIgnore
     private Logged logged;
+
+    @OneToMany
+    @JoinColumn(name = "user_id")
+    private List<Authority> authorities;
 }
 //    create table users (
 //        id int primary key auto_increment,

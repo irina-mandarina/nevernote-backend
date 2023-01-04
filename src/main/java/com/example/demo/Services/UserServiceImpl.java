@@ -1,11 +1,13 @@
 package com.example.demo.Services;
 
+import com.example.demo.Entities.Authority;
 import com.example.demo.Entities.User;
 import com.example.demo.JWTconfig.JWT;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.models.GET.UserDetailsResponse;
 import com.example.demo.models.POST.LogInRequest;
 import com.example.demo.models.POST.RegistrationRequest;
+import com.example.demo.types.AuthorityType;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,7 +25,7 @@ import java.util.Objects;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final LoggedService loggedService;
-
+    private final AuthorityService authorityService;
     private final JWT jwt;
 
     @Override
@@ -41,6 +43,11 @@ public class UserServiceImpl implements UserService {
         newUser.setAge(registrationRequest.getAge());
         newUser.setPassword(registrationRequest.getPassword());
         userRepository.save(newUser);
+
+        for (AuthorityType role: registrationRequest.getRoles()) {
+            authorityService.addRole(newUser, role);
+        }
+
         loggedService.startSession(newUser);
 
         return new ResponseEntity<>(
