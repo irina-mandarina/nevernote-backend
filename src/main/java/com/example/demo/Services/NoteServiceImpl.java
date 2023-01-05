@@ -36,9 +36,6 @@ public class NoteServiceImpl implements NoteService {
     private final LoggedService loggedService;
     private final AuthorityService authorityService;
 
-    boolean unauthorized(String username) {
-        return username.isEmpty() || (userService.findByUsername(username) == null) || !loggedService.isLogged(userService.findByUsername(username));
-    }
     @Override
     public ResponseEntity<String> getNotes(@RequestHeader String username, NoteType noteType) {
         User user = userService.findByUsername(username);
@@ -65,6 +62,10 @@ public class NoteServiceImpl implements NoteService {
                 default -> notes = findAllByUser(user);
             }
         }
+        System.out.println(noteType.name());
+        for (Note note: notes) {
+            System.out.println(note.getId() + ": " + note.getTitle());
+        }
 
         final HttpHeaders httpHeaders= new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -78,7 +79,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public ResponseEntity<String> addNote(@RequestHeader String username, @RequestBody NoteRequest noteRequest) {
-        if (authorityService.hasRole(username, AuthorityType.ADMIN)) {
+        if (!authorityService.hasRole(username, AuthorityType.USER)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         Note note = new Note();
@@ -106,12 +107,6 @@ public class NoteServiceImpl implements NoteService {
     public ResponseEntity<String> editNote(@PathVariable Long id, @RequestHeader String username, @RequestBody NoteRequest noteRequest) {
 
         Note note = findNoteById(id);
-
-        if (note == null || !Objects.equals(note.getUser().getUsername(), username)) {
-            return new ResponseEntity<>(
-                    HttpStatus.NOT_FOUND
-            );
-        }
 
         note.setContent(noteRequest.getContent());
         note.setTitle(noteRequest.getTitle());
@@ -268,7 +263,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<Note> findAllByDeadlineIsNotNull() {
-        return noteRepository.findAllByDeadlineIsNull();
+        return noteRepository.findAllByDeadlineIsNotNull();
     }
 
     @Override

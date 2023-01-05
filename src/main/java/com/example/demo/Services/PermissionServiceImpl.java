@@ -46,11 +46,6 @@ public class PermissionServiceImpl implements PermissionService {
         System.out.printf(user.getUsername());
         System.out.printf(note.getTitle());
 
-        if (Objects.isNull(user) || Objects.isNull(note) || Objects.isNull(granter)) {
-            // username or note does not exist
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-
         if (!note.getUser().getUsername().equals(granter.getUsername())) {
             // granter is not the owner of the note
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -103,9 +98,9 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public ResponseEntity<String> getAllPermissionsForNote(String username, Long noteId) {
         Gson gson = new Gson();
-        List<Permission> permissions = findPermissionsByNoteId(noteId);
         // if the owner requests getting the permissions
         if (noteService.findNoteById(noteId).getUser().getUsername().equals(username)) {
+            List<Permission> permissions = findPermissionsByNoteId(noteId);
             // the owner should have all permissions
             if (permissions.size() != 4) {
                 // there are missing permissions in the db
@@ -145,20 +140,23 @@ public class PermissionServiceImpl implements PermissionService {
                                 )
                         );
             }
+        }
+        else {
             // if another user requests the permissions for a note, he should get only his
             List<PermissionRequest> permissionRequestList = new ArrayList<>(4);
             for (Permission permission: findAllByUserUsernameAndNoteId(username, noteId)) {
+                System.out.println(permission.getPermissionType().name());
                 permissionRequestList.add(new PermissionRequest(permission));
             }
+            System.out.println("size: " + findAllByUserUsernameAndNoteId(username, noteId).size());
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
-                        gson.toJson(
-                                permissionRequestList
-                        )
-            );
+                            gson.toJson(
+                                    permissionRequestList
+                            )
+                    );
         }
-
         return null;
     }
 

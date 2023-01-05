@@ -2,12 +2,8 @@ package com.example.demo.Repositories;
 
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
-import com.example.demo.types.NoteType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import javax.validation.constraints.NotNull;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 

@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService {
                     HttpStatus.BAD_REQUEST
             );
         }
+
         User newUser = new User();
         newUser.setUsername(registrationRequest.getUsername());
         newUser.setName(registrationRequest.getName());
@@ -44,14 +45,22 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(registrationRequest.getPassword());
         userRepository.save(newUser);
 
-        for (AuthorityType role: registrationRequest.getRoles()) {
-            authorityService.addRole(newUser, role);
+        if (Objects.isNull(registrationRequest.getRoles())) {
+            authorityService.addRole(newUser, AuthorityType.USER);
+        }
+        else {
+            for (AuthorityType role: registrationRequest.getRoles()) {
+                authorityService.addRole(newUser, role);
+            }
         }
 
+        String token = jwt.generate(newUser);
         loggedService.startSession(newUser);
 
-        return new ResponseEntity<>(
+        return ResponseEntity.status(
                 HttpStatus.CREATED
+        ).body(
+                token
         );
     }
 

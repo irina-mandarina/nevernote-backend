@@ -22,7 +22,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Override
     public ResponseEntity<String> getRoles(User user) {
         List<Authority> roles = findAllByUserUsername(user.getUsername());
-        if (Objects.isNull(roles)) {
+        if (roles.size() == 0) {
             // user has no roles in the db therefore they have only a user role
             addRole(user, AuthorityType.USER);
         }

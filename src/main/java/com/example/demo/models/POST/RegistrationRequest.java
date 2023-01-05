@@ -17,5 +17,5 @@ public class RegistrationRequest {
     String address;
     String username;
     String password;
-    List<AuthorityType> roles = new ArrayList<>();
+    AuthorityType roles[] ;
 }

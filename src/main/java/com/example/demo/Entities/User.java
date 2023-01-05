@@ -47,7 +47,7 @@ public class User {
 
     @OneToMany
     @JoinColumn(name = "user_id")
-    private List<Authority> authorities;
+    private List<Authority> roles;
 }
 //    create table users (
 //        id int primary key auto_increment,
