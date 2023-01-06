@@ -79,6 +79,12 @@ public class LogServiceImpl implements LogService {
             logPermission(response, username, methodType, path);
             return;
         }
+        else if (path.contains("roles")) {
+            logRoles(response, username, methodType, path);
+        }
+        else if (path.contains("auth")) {
+            logAuth(response, username, methodType, path);
+        }
         Log log = new Log();
         log.setUser(userService.findByUsername(username));
         log.setPath(path);
@@ -145,7 +151,7 @@ public class LogServiceImpl implements LogService {
 
     }
 
-    public void logPermission(ResponseEntity<String> response, String username,
+    private void logPermission(ResponseEntity<String> response, String username,
                               Method methodType, String path) {
         Log log = new Log();
         log.setPath(path);
@@ -183,6 +189,47 @@ public class LogServiceImpl implements LogService {
         log.setSubjectId(noteId);
         log.setSubject("note permissions");
         log.setMessage(message);
+        logsRepository.save(log);
+    }
+
+    private void logRoles(ResponseEntity<String> response, String username,
+                          Method methodType, String path) {
+        Log log = new Log();
+        log.setSubject(username + " roles");
+        log.setUser(userService.findByUsername(username));
+        log.setPath(path);
+        log.setTimestamp(new Timestamp(new Date().getTime()));
+        log.setSubjectId(userService.findByUsername(username).getId());
+        log.setMethod(methodType);
+        if (methodType.equals(Method.GET)) {
+            log.setMessage(username + " retrieved their roles.");
+        }
+        logsRepository.save(log);
+    }
+
+    private void logAuth(ResponseEntity<String> response, String username,
+                          Method methodType, String path) {
+        Log log = new Log();
+        log.setUser(userService.findByUsername(username));
+        log.setTimestamp(new Timestamp(new Date().getTime()));
+        log.setPath(path);
+        log.setMethod(methodType);
+
+        String message = username + " ";
+        if (path.contains("register")) {
+            message  += ("registered");
+            log.setSubject(username + " registration");
+        } else if (path.contains("login")) {
+            message += ("logged in");
+            log.setSubject(username + " login");
+        } else if (path.contains("logout")) {
+            message += ("logged out");
+            log.setSubject(username + " logout");
+        }
+        log.setMessage(message);
+
+        log.setSubjectId(userService.findByUsername(username).getId());
+
         logsRepository.save(log);
     }
 }
