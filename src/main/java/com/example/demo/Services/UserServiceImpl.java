@@ -1,8 +1,7 @@
 package com.example.demo.Services;
 
-import com.example.demo.Entities.Authority;
 import com.example.demo.Entities.User;
-import com.example.demo.JWTconfig.JWT;
+import com.example.demo.security.JWT;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.models.GET.UserDetailsResponse;
 import com.example.demo.models.POST.LogInRequest;

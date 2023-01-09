@@ -1,4 +1,4 @@
-package com.example.demo.JWTconfig;
+package com.example.demo.security;
 
 import com.example.demo.Services.LoggedService;
 import com.example.demo.Services.UserService;

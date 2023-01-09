@@ -1,4 +1,4 @@
-package com.example.demo.JWTconfig;
+package com.example.demo.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,10 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
@@ -20,16 +18,16 @@ import javax.sql.DataSource;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final JWTAuthenticationFilter JWTAuthenticationFilter;
-    @Bean
-    public JdbcUserDetailsManager users(DataSource dataSource) {
-        return new JdbcUserDetailsManager(dataSource);
-    }
+    private final RoleFilter roleFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.addFilterAfter(
                 JWTAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterAfter(
+                roleFilter, JWTAuthenticationFilter.getClass());
 
         http
                 .csrf(AbstractHttpConfigurer::disable)

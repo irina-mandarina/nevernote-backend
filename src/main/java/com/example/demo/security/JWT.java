@@ -1,17 +1,13 @@
-package com.example.demo.JWTconfig;
+package com.example.demo.security;
 
 import com.example.demo.Entities.User;
 import java.util.Base64;
 import java.util.Date;
 import javax.crypto.SecretKey;
-import com.example.demo.Services.LoggedService;
-import com.example.demo.Services.UserService;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
