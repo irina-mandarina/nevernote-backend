@@ -38,7 +38,6 @@ public class AuthorityServiceImpl implements AuthorityService {
         if (hasRole(user.getUsername(), role)) {
             return;
         }
-
         Authority authority = new Authority();
         authority.setRole(role);
         authority.setUser(user);
@@ -65,27 +64,27 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     @Override
     public ResponseEntity<String> removeRole(User loggedUser, User user, AuthorityType role) {
-        if (Objects.isNull(findByUserUsernameAndAuthority(loggedUser.getUsername(), AuthorityType.ADMIN))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
+//        if (Objects.isNull(findByUserUsernameAndAuthority(loggedUser.getUsername(), AuthorityType.ADMIN))) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+//        }
         Authority authority = findByUserUsernameAndAuthority(user.getUsername(), role);
         if (authority.getRole().equals(AuthorityType.USER) && findAllByUserUsername(user.getUsername()).size() == 1) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("The only role they have cannot be removed.");
         }
-        if (Objects.isNull(authority)) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body("User " + user.getUsername() + " does not own " + role.name());
-        }
+//        if (Objects.isNull(authority)) {
+//            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+//                    .body("User " + user.getUsername() + " does not own " + role.name());
+//        }
         authorityRepository.delete(authority);
         return getStringResponseEntity(findAllByUserUsername(user.getUsername()));
     }
 
     @Override
     public ResponseEntity<String> addRoleFromLoggedUser(User loggedUser, User user, AuthorityType role) {
-        if (Objects.isNull(findByUserUsernameAndAuthority(loggedUser.getUsername(), AuthorityType.ADMIN))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
+//        if (Objects.isNull(findByUserUsernameAndAuthority(loggedUser.getUsername(), AuthorityType.ADMIN))) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+//        }
         addRole(user, role);
         return getStringResponseEntity(findAllByUserUsername(user.getUsername()));
     }

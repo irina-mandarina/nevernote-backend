@@ -27,21 +27,21 @@ public class AuthorityController {
     @GetMapping("/users/roles")
     ResponseEntity<String> getAllRoles(@RequestAttribute String username) {
         ResponseEntity<String> response = authorityService.getAllRoles(userService.findAll());
-        logService.log(response, username, Method.GET, "/roles");
+        logService.log(response, username, Method.GET, "/users/roles");
         return response;
     }
 
     @PostMapping("/users/{usernameGettingRole}/roles")
     ResponseEntity<String> addRole(@RequestAttribute String username, @RequestBody AuthorityType role, @PathVariable String usernameGettingRole) {
         ResponseEntity<String> response = authorityService.addRoleFromLoggedUser(userService.findByUsername(username), userService.findByUsername(usernameGettingRole), role);
-        logService.log(response, username, Method.GET, "/roles");
+        logService.log(response, username, Method.POST, "/users/" + usernameGettingRole + "/roles");
         return response;
     }
 
     @DeleteMapping("/users/{usernameLosingRole}/roles")
     ResponseEntity<String> removeRole(@RequestAttribute String username, @RequestParam AuthorityType role, @PathVariable String usernameLosingRole) {
         ResponseEntity<String> response = authorityService.removeRole(userService.findByUsername(username), userService.findByUsername(usernameLosingRole), role);
-        logService.log(response, username, Method.GET, "/roles");
+        logService.log(response, username, Method.DELETE, "/users/" + usernameLosingRole + "/roles");
         return response;
     }
 }

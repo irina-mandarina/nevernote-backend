@@ -81,9 +81,11 @@ public class LogServiceImpl implements LogService {
         }
         else if (path.contains("roles")) {
             logRoles(response, username, methodType, path);
+            return;
         }
         else if (path.contains("auth")) {
             logAuth(response, username, methodType, path);
+            return;
         }
         Log log = new Log();
         log.setUser(userService.findByUsername(username));
@@ -195,15 +197,32 @@ public class LogServiceImpl implements LogService {
     private void logRoles(ResponseEntity<String> response, String username,
                           Method methodType, String path) {
         Log log = new Log();
-        log.setSubject(username + " roles");
         log.setUser(userService.findByUsername(username));
         log.setPath(path);
         log.setTimestamp(new Timestamp(new Date().getTime()));
         log.setSubjectId(userService.findByUsername(username).getId());
         log.setMethod(methodType);
+
+        String message = "";
         if (methodType.equals(Method.GET)) {
-            log.setMessage(username + " retrieved their roles.");
+            message += "retrieved ";
+            if (path.contains("auth")) {
+                log.setSubject(username + " roles");
+                message += "their roles.";
+            }
+            else {
+                log.setSubject("roles");
+                message += "all roles.";
+            }
         }
+        if (methodType.equals(Method.DELETE)) {
+            message += "removed " + path.split("/")[1] + " " + path.substring(path.indexOf('?')) + " role.";
+        }
+        if (methodType.equals(Method.POST)) {
+            message += "gave " + path.split("/")[1] + " a/an " + path.substring(path.indexOf('?')) + " role.";
+        }
+
+        log.setMessage(message);
         logsRepository.save(log);
     }
 
