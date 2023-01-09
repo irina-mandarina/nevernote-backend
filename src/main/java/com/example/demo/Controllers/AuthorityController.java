@@ -34,14 +34,14 @@ public class AuthorityController {
     @PostMapping("/users/{usernameGettingRole}/roles")
     ResponseEntity<String> addRole(@RequestAttribute String username, @RequestBody AuthorityType role, @PathVariable String usernameGettingRole) {
         ResponseEntity<String> response = authorityService.addRoleFromLoggedUser(userService.findByUsername(username), userService.findByUsername(usernameGettingRole), role);
-        logService.log(response, username, Method.POST, "/users/" + usernameGettingRole + "/roles");
+        logService.log(response, username, Method.POST, "/users/" + usernameGettingRole + "/roles?" + role.name());
         return response;
     }
 
     @DeleteMapping("/users/{usernameLosingRole}/roles")
     ResponseEntity<String> removeRole(@RequestAttribute String username, @RequestParam AuthorityType role, @PathVariable String usernameLosingRole) {
         ResponseEntity<String> response = authorityService.removeRole(userService.findByUsername(username), userService.findByUsername(usernameLosingRole), role);
-        logService.log(response, username, Method.DELETE, "/users/" + usernameLosingRole + "/roles");
+        logService.log(response, username, Method.DELETE, "/users/" + usernameLosingRole + "/roles?" + role.name());
         return response;
     }
 }

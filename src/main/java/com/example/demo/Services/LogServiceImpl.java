@@ -216,10 +216,10 @@ public class LogServiceImpl implements LogService {
             }
         }
         if (methodType.equals(Method.DELETE)) {
-            message += "removed " + path.split("/")[1] + " " + path.substring(path.indexOf('?')) + " role.";
+            message += "removed " + path.split("/")[2] + " " + path.substring(path.indexOf('?')).replace("?", "") + " role.";
         }
         if (methodType.equals(Method.POST)) {
-            message += "gave " + path.split("/")[1] + " a/an " + path.substring(path.indexOf('?')) + " role.";
+            message += "gave " + path.split("/")[2] + " a/an " + path.substring(path.indexOf('?')).replace("?", "") + " role.";
         }
 
         log.setMessage(message);
