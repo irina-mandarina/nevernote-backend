@@ -17,5 +17,4 @@ public class RegistrationRequest {
     String address;
     String username;
     String password;
-    AuthorityType roles[] ;
 }

@@ -46,14 +46,7 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(registrationRequest.getPassword());
         userRepository.save(newUser);
 
-        if (Objects.isNull(registrationRequest.getRoles())) {
-            authorityService.addRole(newUser, AuthorityType.USER);
-        }
-        else {
-            for (AuthorityType role: registrationRequest.getRoles()) {
-                authorityService.addRole(newUser, role);
-            }
-        }
+        authorityService.addRole(newUser, AuthorityType.USER);
 
         String token = jwt.generate(newUser);
         loggedService.startSession(newUser);
