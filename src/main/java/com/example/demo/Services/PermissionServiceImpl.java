@@ -105,7 +105,7 @@ public class PermissionServiceImpl implements PermissionService {
             if (permissions.size() != 4) {
                 // there are missing permissions in the db
                 List<Method> existingPermissionTypes = new ArrayList<>(4);
-                for (Permission permission: permissions) {
+                for (Permission permission : permissions) {
                     switch (permission.getPermissionType()) {
                         case GET -> existingPermissionTypes.add(Method.GET);
                         case PUT -> existingPermissionTypes.add(Method.PUT);
@@ -126,20 +126,20 @@ public class PermissionServiceImpl implements PermissionService {
                 if (!existingPermissionTypes.contains(Method.DELETE)) {
                     grantPermission(username, new PermissionRequest(username, Method.DELETE, noteId));
                 }
-
-                // if the owner of the note requests the permissions, he should get all of them
-                List<PermissionRequest> permissionRequestList = new ArrayList<>(4);
-                for (Permission permission: findPermissionsByNoteId(noteId)) {
-                    permissionRequestList.add(new PermissionRequest(permission));
-                }
-
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(
-                                gson.toJson(
-                                        permissionRequestList
-                                )
-                        );
             }
+            // if the owner of the note requests the permissions, he should get all of them
+            List<PermissionRequest> permissionRequestList = new ArrayList<>(4);
+            for (Permission permission: findPermissionsByNoteId(noteId)) {
+                permissionRequestList.add(new PermissionRequest(permission));
+            }
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(
+                            gson.toJson(
+                                    permissionRequestList
+                            )
+                    );
+
         }
         else {
             // if another user requests the permissions for a note, he should get only his
@@ -157,7 +157,6 @@ public class PermissionServiceImpl implements PermissionService {
                             )
                     );
         }
-        return null;
     }
 
     @Override

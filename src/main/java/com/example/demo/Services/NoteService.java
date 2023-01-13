@@ -2,6 +2,7 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
+import com.example.demo.Repositories.projections.NoteId;
 import com.example.demo.models.POST.NoteRequest;
 import com.example.demo.types.NoteType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public interface NoteService {
     ResponseEntity<String> togglePrivacy(Long id, String username);
 
     List<Note> findAllByUser(User user);
+    List<Long> findNotesByUser(User user);
 
     List<Note> findAllByUserAndDeadlineIsNull(User user);
 

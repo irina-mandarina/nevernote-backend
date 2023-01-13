@@ -5,7 +5,6 @@ import com.example.demo.Entities.User;
 import com.example.demo.Repositories.LogsRepository;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.models.GET.NoteResponse;
-import com.example.demo.models.POST.PermissionRequest;
 import com.example.demo.types.Method;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +41,11 @@ public class LogServiceImpl implements LogService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        List<LogResponse> response = logsToLogResponses(findAllByUserOrderByIdDesc(user));
+        List<LogResponse> response = logsToLogResponses(
+                findAllByUserOrSubjectAndSubjectIdIsInOrderByIdDesc(
+                        user, "note", noteService.findNotesByUser(user)
+                )
+        );
 
         Gson gson = new Gson();
         return ResponseEntity.status(HttpStatus.OK)
@@ -50,8 +53,9 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
-    public List<Log> findAllByUserOrderByIdDesc(User user) {
-        return logsRepository.findAllByUserOrderByIdDesc(user);
+    public List<Log> findAllByUserOrSubjectAndSubjectIdIsInOrderByIdDesc(
+            User user, String subject, List<Long> subjectIds) {
+        return logsRepository.findAllByUserOrSubjectAndSubjectIdIsInOrderByIdDesc(user, subject, subjectIds);
     }
 
     @Override
@@ -76,15 +80,19 @@ public class LogServiceImpl implements LogService {
             return;
         }
         if (path.contains("permissions")) {
-            logPermission(response, username, methodType, path);
+            logPermission(username, methodType, path);
             return;
         }
         else if (path.contains("roles")) {
-            logRoles(response, username, methodType, path);
+            logRoles(username, methodType, path);
             return;
         }
         else if (path.contains("auth")) {
-            logAuth(response, username, methodType, path);
+            logAuth(username, methodType, path);
+            return;
+        }
+        else if (path.contains("notes")) {
+            logNotes(response, username, methodType, path);
             return;
         }
         Log log = new Log();
@@ -153,8 +161,47 @@ public class LogServiceImpl implements LogService {
 
     }
 
-    private void logPermission(ResponseEntity<String> response, String username,
-                              Method methodType, String path) {
+    private void logNotes(ResponseEntity<String> response, String username, Method methodType, String path) {
+        Log log = new Log();
+        log.setPath(path);
+        log.setUser(userService.findByUsername(username));
+        log.setMethod(methodType);
+        log.setTimestamp(new Timestamp(new Date().getTime()));
+        String message = username + " ";
+        if (methodType.equals(Method.GET)) {
+            message += "retrieved " + path.substring(path.indexOf('?') + 1) + " notes";
+        }
+        else {
+            log.setSubject("note");
+
+            Gson gson = new Gson();
+            NoteResponse noteResponse = gson.fromJson(response.getBody(), NoteResponse.class);
+            log.setSubjectId(noteResponse.getId());
+
+            if (methodType.equals(Method.POST)) {
+                message += "created note " + noteResponse.getId();
+            }
+            else if (methodType.equals(Method.DELETE)) {
+                message += "deleted note " + noteResponse.getId();
+            }
+            else if (methodType.equals(Method.PUT)) {
+                if ((path.split("/")[path.split("/").length - 1]).equals("completed")) {
+                    message += "completed note " + noteResponse.getId();
+                }
+                else if ((path.split("/")[path.split("/").length - 1]).equals("privacy")) {
+                    message += "changed note " + noteResponse.getId() + "'s privacy";
+                }
+                else {
+                    message += "changed note " + noteResponse.getId() + "'s privacy";
+                }
+            }
+        }
+        log.setMessage(message + ".");
+        logsRepository.save(log);
+    }
+
+    private void logPermission(String username,
+                               Method methodType, String path) {
         Log log = new Log();
         log.setPath(path);
         log.setUser(userService.findByUsername(username));
@@ -190,11 +237,11 @@ public class LogServiceImpl implements LogService {
         }
         log.setSubjectId(noteId);
         log.setSubject("note permissions");
-        log.setMessage(message);
+        log.setMessage(message + ".");
         logsRepository.save(log);
     }
 
-    private void logRoles(ResponseEntity<String> response, String username,
+    private void logRoles(String username,
                           Method methodType, String path) {
         Log log = new Log();
         log.setUser(userService.findByUsername(username));
@@ -215,19 +262,22 @@ public class LogServiceImpl implements LogService {
                 message += "all roles.";
             }
         }
-        if (methodType.equals(Method.DELETE)) {
-            message += "removed " + path.split("/")[2] + " " + path.substring(path.indexOf('?')).replace("?", "") + " role.";
-        }
-        if (methodType.equals(Method.POST)) {
-            message += "gave " + path.split("/")[2] + " a/an " + path.substring(path.indexOf('?')).replace("?", "") + " role.";
+        else {
+            String roleType = path.substring(path.indexOf('?')).replace("?", "");
+            if (methodType.equals(Method.DELETE)) {
+                message += "removed " + path.split("/")[2] + " " + roleType + " role.";
+            }
+            if (methodType.equals(Method.POST)) {
+                message += "gave " + path.split("/")[2] + " a/an " + roleType + " role.";
+            }
         }
 
         log.setMessage(message);
         logsRepository.save(log);
     }
 
-    private void logAuth(ResponseEntity<String> response, String username,
-                          Method methodType, String path) {
+    private void logAuth(String username,
+                         Method methodType, String path) {
         Log log = new Log();
         log.setUser(userService.findByUsername(username));
         log.setTimestamp(new Timestamp(new Date().getTime()));

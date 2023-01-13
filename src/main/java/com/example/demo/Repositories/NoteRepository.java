@@ -2,6 +2,7 @@ package com.example.demo.Repositories;
 
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
+import com.example.demo.Repositories.projections.NoteId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
@@ -11,6 +12,7 @@ import java.util.List;
 public interface NoteRepository extends JpaRepository <Note, Long> {
 
     List<Note> findAllByUser(User user);
+    List<NoteId> findNotesByUser(User user);
     List<Note> findAllByUserAndDeadlineIsNull(User user); // find all notes - those without a deadline
     List<Note> findAllByUserAndDeadlineIsNotNull(User user); // find all notes with a deadline = find all tasks
     List<Note> findAllByUserAndCompletedFalseAndDeadlineAfter(User user, Timestamp now); // find tasks that need to be done

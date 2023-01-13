@@ -11,7 +11,10 @@ import java.util.List;
 public interface LogService {
     ResponseEntity<String> getNoteLogs(Long noteId);
     ResponseEntity<String> getUserLogs(String username);
-    List<Log> findAllByUserOrderByIdDesc(User user);
+
+    List<Log> findAllByUserOrSubjectAndSubjectIdIsInOrderByIdDesc(
+            User user, String subject, List<Long> subjectIds);
+
     List<Log> findAllBySubjectAndSubjectId(String subject, Long subjectId);
     List<LogResponse> logsToLogResponses(List<Log> logs);
     void log(ResponseEntity<String> response, String username, Method methodType, String path);

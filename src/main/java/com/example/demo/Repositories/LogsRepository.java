@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface LogsRepository extends JpaRepository<Log, Long> {
-    List<Log> findAllByUserOrderByIdDesc(User user);
+    List<Log> findAllByUserOrSubjectAndSubjectIdIsInOrderByIdDesc(User user, String subject, List<Long> subjectIds);
     List<Log> findAllBySubjectAndSubjectId(String subject, Long subjectId);
 }

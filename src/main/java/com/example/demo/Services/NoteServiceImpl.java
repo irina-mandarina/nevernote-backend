@@ -4,6 +4,7 @@ import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
 import com.example.demo.Repositories.NoteRepository;
 import com.example.demo.Repositories.PermissionRepository;
+import com.example.demo.Repositories.projections.NoteId;
 import com.example.demo.models.GET.NoteResponse;
 import com.example.demo.models.GET.GetNotes;
 import com.example.demo.models.POST.NoteRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.sql.Timestamp;
 import java.util.List;
@@ -226,6 +228,16 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public List<Note> findAllByUser(User user) {
         return noteRepository.findAllByUser(user);
+    }
+
+    @Override
+    public List<Long> findNotesByUser(User user) {
+        List<NoteId> noteIds = noteRepository.findNotesByUser(user);
+        List<Long> res = new ArrayList<>(noteIds.size());
+        for (NoteId noteId: noteIds) {
+            res.add(noteId.getId());
+        }
+        return res;
     }
 
     @Override

@@ -19,7 +19,7 @@ public class NoteController {
     @GetMapping("/notes")
     ResponseEntity<String> getNotes(@RequestAttribute String username, @RequestParam NoteType noteType) {
         ResponseEntity<String> response = noteService.getNotes(username, noteType);
-        logService.log(response, username, Method.GET, "/notes");
+        logService.log(response, username, Method.GET, "/notes" + "?" + noteType.name());
         return response;
     }
 
