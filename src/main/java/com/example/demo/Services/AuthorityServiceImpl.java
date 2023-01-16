@@ -2,7 +2,7 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Authority;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.AuthorityRepository;
+import com.example.demo.repositories.AuthorityRepository;
 import com.example.demo.models.GET.AuthorityResponse;
 import com.example.demo.types.AuthorityType;
 import com.google.gson.Gson;

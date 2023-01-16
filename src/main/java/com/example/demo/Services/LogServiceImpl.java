@@ -2,12 +2,13 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Log;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.LogsRepository;
+import com.example.demo.repositories.LogsRepository;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.models.GET.NoteResponse;
 import com.example.demo.types.Method;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -159,6 +160,15 @@ public class LogServiceImpl implements LogService {
         log.setMessage(message + ".");
         logsRepository.save(log);
 
+    }
+
+    @Override
+    public ResponseEntity<String> searchLogs(Specification<Log> spec) {
+        return ResponseEntity.ok().body(
+                (new Gson()).toJson(
+                        logsRepository.findAll(spec)
+                )
+        );
     }
 
     private void logNotes(ResponseEntity<String> response, String username, Method methodType, String path) {

@@ -2,9 +2,9 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.NoteRepository;
-import com.example.demo.Repositories.PermissionRepository;
-import com.example.demo.Repositories.projections.NoteId;
+import com.example.demo.repositories.NoteRepository;
+import com.example.demo.repositories.PermissionRepository;
+import com.example.demo.repositories.projections.NoteId;
 import com.example.demo.models.GET.NoteResponse;
 import com.example.demo.models.GET.GetNotes;
 import com.example.demo.models.POST.NoteRequest;

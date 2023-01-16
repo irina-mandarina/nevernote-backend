@@ -2,7 +2,7 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.User;
 import com.example.demo.security.JWT;
-import com.example.demo.Repositories.UserRepository;
+import com.example.demo.repositories.UserRepository;
 import com.example.demo.models.GET.UserDetailsResponse;
 import com.example.demo.models.POST.LogInRequest;
 import com.example.demo.models.POST.RegistrationRequest;

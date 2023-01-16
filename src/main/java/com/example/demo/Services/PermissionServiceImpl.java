@@ -3,7 +3,7 @@ package com.example.demo.Services;
 import com.example.demo.Entities.Permission;
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.PermissionRepository;
+import com.example.demo.repositories.PermissionRepository;
 import com.example.demo.models.POST.PermissionRequest;
 import com.example.demo.types.Method;
 import com.google.gson.Gson;
@@ -41,10 +41,6 @@ public class PermissionServiceImpl implements PermissionService {
         User granter = userService.findByUsername(username);
         User user = userService.findByUsername(permissionRequest.getUsername());
         Note note = noteService.findNoteById(permissionRequest.getNoteId());
-
-        System.out.printf(granter.getUsername());
-        System.out.printf(user.getUsername());
-        System.out.printf(note.getTitle());
 
         if (!note.getUser().getUsername().equals(granter.getUsername())) {
             // granter is not the owner of the note
@@ -145,10 +141,8 @@ public class PermissionServiceImpl implements PermissionService {
             // if another user requests the permissions for a note, he should get only his
             List<PermissionRequest> permissionRequestList = new ArrayList<>(4);
             for (Permission permission: findAllByUserUsernameAndNoteId(username, noteId)) {
-                System.out.println(permission.getPermissionType().name());
                 permissionRequestList.add(new PermissionRequest(permission));
             }
-            System.out.println("size: " + findAllByUserUsernameAndNoteId(username, noteId).size());
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(

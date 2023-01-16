@@ -1,4 +1,4 @@
-package com.example.demo.Repositories;
+package com.example.demo.repositories;
 
 import com.example.demo.Entities.Authority;
 import com.example.demo.types.AuthorityType;

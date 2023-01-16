@@ -2,7 +2,6 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.projections.NoteId;
 import com.example.demo.models.POST.NoteRequest;
 import com.example.demo.types.NoteType;
 import org.springframework.http.ResponseEntity;

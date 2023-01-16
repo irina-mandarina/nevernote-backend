@@ -1,8 +1,8 @@
-package com.example.demo.Repositories;
+package com.example.demo.repositories;
 
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.projections.NoteId;
+import com.example.demo.repositories.projections.NoteId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;

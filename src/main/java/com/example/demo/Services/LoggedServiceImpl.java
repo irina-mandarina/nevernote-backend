@@ -2,7 +2,7 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Logged;
 import com.example.demo.Entities.User;
-import com.example.demo.Repositories.LoggedRepository;
+import com.example.demo.repositories.LoggedRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
