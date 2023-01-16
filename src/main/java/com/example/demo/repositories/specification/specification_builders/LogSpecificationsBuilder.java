@@ -1,6 +1,7 @@
 package com.example.demo.repositories.specification.specification_builders;
 
 import com.example.demo.Entities.Log;
+import com.example.demo.models.GET.LogResponse;
 import com.example.demo.repositories.specification.LogSpecification;
 import com.example.demo.types.SearchOperation;
 import com.example.demo.repositories.search_criteria.SpecSearchCriteria;
@@ -41,11 +42,11 @@ public class LogSpecificationsBuilder {
         return this;
     }
 
-    public Specification<Log> build() {
+    public Specification<LogResponse> build() {
         if (params.size() == 0)
             return null;
 
-        Specification<Log> result = new LogSpecification(params.get(0));
+        Specification<LogResponse> result = new LogSpecification(params.get(0));
 
         for (int i = 1; i < params.size(); i++) {
             result = params.get(i).isOrPredicate()

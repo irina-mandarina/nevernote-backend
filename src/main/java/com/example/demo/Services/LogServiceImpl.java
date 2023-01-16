@@ -2,9 +2,11 @@ package com.example.demo.Services;
 
 import com.example.demo.Entities.Log;
 import com.example.demo.Entities.User;
+import com.example.demo.repositories.LogResponsesRepository;
 import com.example.demo.repositories.LogsRepository;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.models.GET.NoteResponse;
+import com.example.demo.repositories.search_criteria.SearchCriteria;
 import com.example.demo.types.Method;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +14,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import com.example.demo.repositories.search_criteria.consumers.LogSearchQueryCriteriaConsumer;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -20,6 +28,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LogServiceImpl implements LogService {
     private final LogsRepository logsRepository;
+//    private final LogResponsesRepository logResponsesRepository;
     private final NoteService noteService;
     private final UserService userService;
     @Override
@@ -33,6 +42,31 @@ public class LogServiceImpl implements LogService {
         Gson gson = new Gson();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(gson.toJson( response ));
+    }
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    public ResponseEntity<String> searchLogs(final List<SearchCriteria> params) {
+        final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<Log> query = builder.createQuery(Log.class);
+        final Root r = query.from(LogResponse.class);
+
+        Predicate predicate = builder.conjunction();
+        LogSearchQueryCriteriaConsumer searchConsumer = new LogSearchQueryCriteriaConsumer(predicate, builder, r);
+        params.stream().forEach(searchConsumer);
+        predicate = searchConsumer.getPredicate();
+        query.where(predicate);
+
+        List<LogResponse> response = logsToLogResponses(
+                entityManager.createQuery(query).getResultList()
+        );
+
+        return ResponseEntity.ok().body(
+                (new Gson()).toJson(
+                        response
+                )
+        );
     }
 
     @Override
@@ -162,14 +196,7 @@ public class LogServiceImpl implements LogService {
 
     }
 
-    @Override
-    public ResponseEntity<String> searchLogs(Specification<Log> spec) {
-        return ResponseEntity.ok().body(
-                (new Gson()).toJson(
-                        logsRepository.findAll(spec)
-                )
-        );
-    }
+
 
     private void logNotes(ResponseEntity<String> response, String username, Method methodType, String path) {
         Log log = new Log();

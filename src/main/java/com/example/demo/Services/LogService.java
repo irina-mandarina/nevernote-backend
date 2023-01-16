@@ -3,6 +3,7 @@ package com.example.demo.Services;
 import com.example.demo.Entities.Log;
 import com.example.demo.Entities.User;
 import com.example.demo.models.GET.LogResponse;
+import com.example.demo.repositories.search_criteria.SearchCriteria;
 import com.example.demo.types.Method;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
@@ -20,5 +21,5 @@ public interface LogService {
     List<LogResponse> logsToLogResponses(List<Log> logs);
     void log(ResponseEntity<String> response, String username, Method methodType, String path);
 
-    ResponseEntity<String> searchLogs(Specification<Log> spec);
+    ResponseEntity<String> searchLogs(final List<SearchCriteria> params);
 }

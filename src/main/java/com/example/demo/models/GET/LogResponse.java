@@ -2,10 +2,16 @@ package com.example.demo.models.GET;
 
 import com.example.demo.Entities.Log;
 import com.example.demo.types.Method;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.sql.Timestamp;
 
+@Entity
+@NoArgsConstructor
 public class LogResponse {
+    @Id
     private Long id;
     private String username;
     private Timestamp timestamp;
