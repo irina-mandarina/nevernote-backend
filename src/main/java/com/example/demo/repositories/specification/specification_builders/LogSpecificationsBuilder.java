@@ -1,7 +1,6 @@
 package com.example.demo.repositories.specification.specification_builders;
 
 import com.example.demo.Entities.Log;
-import com.example.demo.models.GET.LogResponse;
 import com.example.demo.repositories.specification.LogSpecification;
 import com.example.demo.types.SearchOperation;
 import com.example.demo.repositories.search_criteria.SpecSearchCriteria;
@@ -22,7 +21,9 @@ public class LogSpecificationsBuilder {
         return with(null, key, operation, value, prefix, suffix);
     }
 
-    public final LogSpecificationsBuilder with(final String orPredicate, final String key, final String operation, final Object value, final String prefix, final String suffix) {
+    public final LogSpecificationsBuilder with(final String orPredicate, final String key,
+                                               final String operation, final Object value,
+                                               final String prefix, final String suffix) {
         SearchOperation op = SearchOperation.getSimpleOperation(operation.charAt(0));
         if (op != null) {
             if (op == SearchOperation.EQUALITY) { // the operation may be complex operation
@@ -42,11 +43,11 @@ public class LogSpecificationsBuilder {
         return this;
     }
 
-    public Specification<LogResponse> build() {
+    public Specification<Log> build() {
         if (params.size() == 0)
             return null;
 
-        Specification<LogResponse> result = new LogSpecification(params.get(0));
+        Specification<Log> result = new LogSpecification(params.get(0));
 
         for (int i = 1; i < params.size(); i++) {
             result = params.get(i).isOrPredicate()

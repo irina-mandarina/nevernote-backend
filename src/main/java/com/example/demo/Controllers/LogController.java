@@ -1,11 +1,8 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Entities.Log;
-import com.example.demo.Services.LogService;
+import com.example.demo.services.LogService;
 import com.example.demo.repositories.search_criteria.SearchCriteria;
-import com.example.demo.repositories.specification.specification_builders.LogSpecificationsBuilder;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

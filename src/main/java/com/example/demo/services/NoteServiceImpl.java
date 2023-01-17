@@ -1,4 +1,4 @@
-package com.example.demo.Services;
+package com.example.demo.services;
 
 import com.example.demo.Entities.Note;
 import com.example.demo.Entities.User;

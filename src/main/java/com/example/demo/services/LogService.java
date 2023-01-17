@@ -1,11 +1,10 @@
-package com.example.demo.Services;
+package com.example.demo.services;
 
 import com.example.demo.Entities.Log;
 import com.example.demo.Entities.User;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.repositories.search_criteria.SearchCriteria;
 import com.example.demo.types.Method;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

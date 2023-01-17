@@ -22,6 +22,7 @@ public class Log {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @NotNull
     private User user;
+    private String username;
 
     @Column(name = "timestamp")
     private Timestamp timestamp;
@@ -40,5 +41,10 @@ public class Log {
 
     @Column(name = "subject_id")
     private Long subjectId;
+
+    public void setUser(User user) {
+        this.user = user;
+        this.username = user.getUsername();
+    }
 
 }

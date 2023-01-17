@@ -1,8 +1,7 @@
-package com.example.demo.Services;
+package com.example.demo.services;
 
 import com.example.demo.Entities.Log;
 import com.example.demo.Entities.User;
-import com.example.demo.repositories.LogResponsesRepository;
 import com.example.demo.repositories.LogsRepository;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.models.GET.NoteResponse;
@@ -10,16 +9,12 @@ import com.example.demo.repositories.search_criteria.SearchCriteria;
 import com.example.demo.types.Method;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.example.demo.repositories.search_criteria.consumers.LogSearchQueryCriteriaConsumer;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.util.*;
@@ -50,13 +45,22 @@ public class LogServiceImpl implements LogService {
     public ResponseEntity<String> searchLogs(final List<SearchCriteria> params) {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Log> query = builder.createQuery(Log.class);
-        final Root r = query.from(LogResponse.class);
+        final Root<Log> r = query.from(Log.class);
+        Join<Log, User> userJoin = r.join("user", JoinType.INNER);
 
         Predicate predicate = builder.conjunction();
+        for (SearchCriteria param: params) {
+            if (param.getKey().equals("username")) {
+                // Add a predicate to filter by username
+                predicate = builder.and(predicate, builder.equal(r.get("user"), param.getValue()));
+                query.where(predicate);
+            }
+        }
         LogSearchQueryCriteriaConsumer searchConsumer = new LogSearchQueryCriteriaConsumer(predicate, builder, r);
         params.stream().forEach(searchConsumer);
         predicate = searchConsumer.getPredicate();
         query.where(predicate);
+
 
         List<LogResponse> response = logsToLogResponses(
                 entityManager.createQuery(query).getResultList()

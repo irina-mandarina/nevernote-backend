@@ -1,7 +1,7 @@
 package com.example.demo.security;
 
-import com.example.demo.Services.LoggedService;
-import com.example.demo.Services.UserService;
+import com.example.demo.services.LoggedService;
+import com.example.demo.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;

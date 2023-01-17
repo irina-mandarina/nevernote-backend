@@ -1,7 +1,7 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Services.LogService;
-import com.example.demo.Services.PermissionService;
+import com.example.demo.services.LogService;
+import com.example.demo.services.PermissionService;
 import com.example.demo.types.Method;
 import com.example.demo.models.POST.PermissionRequest;
 import lombok.AllArgsConstructor;

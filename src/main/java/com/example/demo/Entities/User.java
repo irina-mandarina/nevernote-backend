@@ -2,6 +2,7 @@ package com.example.demo.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -20,6 +21,7 @@ public class User {
 
     @Column(name = "username")
     @NotNull
+    @NaturalId
     private String username;
 
     @Column(name = "password")
@@ -48,6 +50,9 @@ public class User {
     @OneToMany
     @JoinColumn(name = "user_id")
     private List<Authority> roles;
+
+    @OneToMany(mappedBy = "user")
+    private List<Log> logs;
 }
 //    create table users (
 //        id int primary key auto_increment,

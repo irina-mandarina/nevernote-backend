@@ -1,8 +1,8 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Services.AuthorityService;
-import com.example.demo.Services.LogService;
-import com.example.demo.Services.UserService;
+import com.example.demo.services.AuthorityService;
+import com.example.demo.services.LogService;
+import com.example.demo.services.UserService;
 import com.example.demo.types.AuthorityType;
 import com.example.demo.types.Method;
 import lombok.AllArgsConstructor;

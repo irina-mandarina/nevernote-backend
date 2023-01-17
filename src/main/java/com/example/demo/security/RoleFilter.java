@@ -1,6 +1,6 @@
 package com.example.demo.security;
 
-import com.example.demo.Services.AuthorityService;
+import com.example.demo.services.AuthorityService;
 import com.example.demo.types.AuthorityType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

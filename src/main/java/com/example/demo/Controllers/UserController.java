@@ -1,9 +1,9 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Services.LogService;
+import com.example.demo.services.LogService;
 import com.example.demo.models.POST.LogInRequest;
 import com.example.demo.models.POST.RegistrationRequest;
-import com.example.demo.Services.UserService;
+import com.example.demo.services.UserService;
 import com.example.demo.types.Method;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

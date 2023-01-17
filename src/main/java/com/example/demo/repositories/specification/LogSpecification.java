@@ -1,7 +1,6 @@
 package com.example.demo.repositories.specification;
 
 import com.example.demo.Entities.Log;
-import com.example.demo.models.GET.LogResponse;
 import com.example.demo.repositories.search_criteria.SpecSearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -10,7 +9,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-public class LogSpecification implements Specification<LogResponse> {
+public class LogSpecification implements Specification<Log> {
 
     private SpecSearchCriteria criteria;
 
@@ -24,7 +23,7 @@ public class LogSpecification implements Specification<LogResponse> {
     }
 
     @Override
-    public Predicate toPredicate(final Root<LogResponse> root, final CriteriaQuery<?> query, final CriteriaBuilder builder) {
+    public Predicate toPredicate(final Root<Log> root, final CriteriaQuery<?> query, final CriteriaBuilder builder) {
         switch (criteria.getOperation()) {
             case EQUALITY:
                 return builder.equal(root.get(criteria.getKey()), criteria.getValue());

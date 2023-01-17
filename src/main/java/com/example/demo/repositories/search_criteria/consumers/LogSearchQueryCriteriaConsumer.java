@@ -1,6 +1,7 @@
 package com.example.demo.repositories.search_criteria.consumers;
 import java.util.function.Consumer;
 
+import com.example.demo.Entities.Log;
 import com.example.demo.repositories.search_criteria.SearchCriteria;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
@@ -10,7 +11,7 @@ public class LogSearchQueryCriteriaConsumer implements Consumer<SearchCriteria>{
 
     private Predicate predicate;
     private CriteriaBuilder builder;
-    private Root r;
+    private Root<Log> r;
 
     public LogSearchQueryCriteriaConsumer(Predicate predicate, CriteriaBuilder builder, Root r) {
         super();
@@ -27,7 +28,10 @@ public class LogSearchQueryCriteriaConsumer implements Consumer<SearchCriteria>{
         } else if (param.getOperation().equalsIgnoreCase("<")) {
             predicate = builder.and(predicate, builder.lessThanOrEqualTo(r.get(param.getKey()), param.getValue().toString()));
         } else if (param.getOperation().equalsIgnoreCase(":")) {
-            if (r.get(param.getKey()).getJavaType() == String.class) {
+            if (param.getKey().equals("username")) {
+                predicate = builder.and(predicate, builder.like(r.get("user"),  "%" + param.getValue() + "%"));
+            }
+            else if (r.get(param.getKey()).getJavaType() == String.class) {
                 predicate = builder.and(predicate, builder.like(r.get(param.getKey()), "%" + param.getValue() + "%"));
             } else {
                 predicate = builder.and(predicate, builder.equal(r.get(param.getKey()), param.getValue()));
