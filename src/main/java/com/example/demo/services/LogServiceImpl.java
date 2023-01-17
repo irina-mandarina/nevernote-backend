@@ -46,16 +46,20 @@ public class LogServiceImpl implements LogService {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Log> query = builder.createQuery(Log.class);
         final Root<Log> r = query.from(Log.class);
-        Join<Log, User> userJoin = r.join("user", JoinType.INNER);
 
         Predicate predicate = builder.conjunction();
-//        for (SearchCriteria param: params) {
-//            if (param.getKey().equals("username")) {
-//                // Add a predicate to filter by username
-//                predicate = builder.and(predicate, builder.equal(r.get("user"), param.getValue()));
-//                query.where(predicate);
-//            }
-//        }
+        for (SearchCriteria param: params) {
+            if (param.getKey().equals("username")) {
+                // Add a predicate to filter by user id and not username
+                predicate = builder.and(predicate, builder.equal(r.get("user"),
+                        userService.findByUsername((String) param.getValue()).getId()));
+                // replace the param
+                params.set(params.indexOf(param), new SearchCriteria(
+                        "user", param.getOperation(), userService.findByUsername((String) param.getValue()).getId()
+                ));
+                query.where(predicate);
+            }
+        }
         LogSearchQueryCriteriaConsumer searchConsumer = new LogSearchQueryCriteriaConsumer(predicate, builder, r);
         params.stream().forEach(searchConsumer);
         predicate = searchConsumer.getPredicate();
