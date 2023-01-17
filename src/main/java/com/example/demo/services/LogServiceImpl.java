@@ -49,13 +49,13 @@ public class LogServiceImpl implements LogService {
         Join<Log, User> userJoin = r.join("user", JoinType.INNER);
 
         Predicate predicate = builder.conjunction();
-        for (SearchCriteria param: params) {
-            if (param.getKey().equals("username")) {
-                // Add a predicate to filter by username
-                predicate = builder.and(predicate, builder.equal(r.get("user"), param.getValue()));
-                query.where(predicate);
-            }
-        }
+//        for (SearchCriteria param: params) {
+//            if (param.getKey().equals("username")) {
+//                // Add a predicate to filter by username
+//                predicate = builder.and(predicate, builder.equal(r.get("user"), param.getValue()));
+//                query.where(predicate);
+//            }
+//        }
         LogSearchQueryCriteriaConsumer searchConsumer = new LogSearchQueryCriteriaConsumer(predicate, builder, r);
         params.stream().forEach(searchConsumer);
         predicate = searchConsumer.getPredicate();
