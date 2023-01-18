@@ -42,7 +42,7 @@ public class LogServiceImpl implements LogService {
     private EntityManager entityManager;
 
     @Override
-    public ResponseEntity<String> searchLogs(final List<SearchCriteria> params) {
+    public ResponseEntity<String> searchLogs(String username, final List<SearchCriteria> params, Boolean orderByDateDesc) {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Log> query = builder.createQuery(Log.class);
         final Root<Log> r = query.from(Log.class);
@@ -64,7 +64,12 @@ public class LogServiceImpl implements LogService {
         params.stream().forEach(searchConsumer);
         predicate = searchConsumer.getPredicate();
         query.where(predicate);
-
+        if (orderByDateDesc) {
+            query.orderBy(builder.desc(r.get("timestamp")));
+        }
+        else {
+            query.orderBy(builder.asc(r.get("timestamp")));
+        }
 
         List<LogResponse> response = logsToLogResponses(
                 entityManager.createQuery(query).getResultList()

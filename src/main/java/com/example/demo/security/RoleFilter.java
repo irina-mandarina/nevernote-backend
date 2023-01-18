@@ -20,14 +20,14 @@ public class RoleFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().contains("roles") && !request.getRequestURI().equals("/auth/roles")) {
+        if ((request.getRequestURI().contains("roles") && !request.getRequestURI().equals("/auth/roles"))
+                || request.getRequestURI().contains("history/search") ) {
             if (!authorityService.hasRole(request.getAttribute("username").toString(), AuthorityType.ADMIN)) {
                 System.out.println(request.getAttribute("username").toString() + " does not have an admin role");
                 response.setStatus(
                         HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-            else System.out.println("has admin");
         }
         filterChain.doFilter(request, response);
     }

@@ -16,19 +16,20 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class LogController {
     private final LogService logService;
-//
-//    @GetMapping("/history")
-//    ResponseEntity<String> getUserLogs(@RequestAttribute String username) {
-//        return logService.getUserLogs(username);
-//    }
+
+    @GetMapping("/history")
+    ResponseEntity<String> getUserLogs(@RequestAttribute String username) {
+        return logService.getUserLogs(username);
+    }
 
     @GetMapping("/{noteId}/history")
     ResponseEntity<String> getNoteLogs(@PathVariable Long noteId) {
         return logService.getNoteLogs(noteId);
     }
 
-    @GetMapping("/history")
-    ResponseEntity<String> searchLogs(@RequestParam(value = "search") String search) {
+    @GetMapping("/history/search")
+    ResponseEntity<String> searchLogs(@RequestAttribute String username, @RequestParam(value = "search") String search,
+                                      @RequestParam(value = "orderByDateDesc") Boolean orderByDateDesc) {
         List<SearchCriteria> params = new ArrayList<SearchCriteria>();
         if (search != null) {
             Pattern pattern = Pattern.compile("(\\w+?)(:|<|>)(\\w+?),");
@@ -37,6 +38,6 @@ public class LogController {
                 params.add(new SearchCriteria(matcher.group(1), matcher.group(2), matcher.group(3)));
             }
         }
-        return logService.searchLogs(params);
+        return logService.searchLogs(username, params, orderByDateDesc);
     }
 }

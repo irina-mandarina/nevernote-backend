@@ -32,12 +32,6 @@ public class LogSearchQueryCriteriaConsumer implements Consumer<SearchCriteria>{
         } else if (param.getOperation().equalsIgnoreCase("<")) {
             predicate = builder.and(predicate, builder.lessThanOrEqualTo(r.get(param.getKey()), param.getValue().toString()));
         } else if (param.getOperation().equalsIgnoreCase(":")) {
-//            if (param.getKey().equals("username")) {
-//                // get the user id
-//                predicate = builder.and(predicate, builder.equal(r.get("user"), userId);
-////                predicate = builder.and(predicate, builder.like(r.get("user"),  "%" + param.getValue() + "%"));
-//
-//            }
             if (r.get(param.getKey()).getJavaType() == String.class) {
                 predicate = builder.and(predicate, builder.like(r.get(param.getKey()), "%" + param.getValue() + "%"));
             } else {
