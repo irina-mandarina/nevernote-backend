@@ -26,6 +26,7 @@ public class Log {
     @Column(name = "timestamp")
     private Timestamp timestamp;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "method")
     private Method method;
 

@@ -58,10 +58,18 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String authorizationHeaderValue = request.getHeader("Authorization");
-        String token;
+        String token = "";
 
         if (authorizationHeaderValue != null && authorizationHeaderValue.startsWith("Bearer")) {
-            token = authorizationHeaderValue.substring(7);
+            try {
+                token = authorizationHeaderValue.substring(7);
+            }
+            catch (Exception e) {
+                System.out.println("Exception: Could not validate token");
+                response.setStatus(
+                        HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
             System.out.println("token: " + token);
             boolean tokenIsValid;
 

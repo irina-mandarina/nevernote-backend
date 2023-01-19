@@ -300,7 +300,7 @@ public class LogServiceImpl implements LogService {
         log.setSubjectId(userService.findByUsername(username).getId());
         log.setMethod(methodType);
 
-        String message = "";
+        String message = username + " ";
         if (methodType.equals(Method.GET)) {
             message += "retrieved ";
             if (path.contains("auth")) {

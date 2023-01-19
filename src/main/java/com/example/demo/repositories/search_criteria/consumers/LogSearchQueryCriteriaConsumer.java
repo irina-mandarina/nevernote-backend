@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import com.example.demo.Entities.Log;
 import com.example.demo.repositories.search_criteria.SearchCriteria;
 import com.example.demo.services.UserService;
+import com.example.demo.types.Method;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,6 +34,9 @@ public class LogSearchQueryCriteriaConsumer implements Consumer<SearchCriteria>{
             predicate = builder.and(predicate, builder.lessThanOrEqualTo(r.get(param.getKey()), param.getValue().toString()));
         } else if (param.getOperation().equalsIgnoreCase(":")) {
             if (r.get(param.getKey()).getJavaType() == String.class) {
+                predicate = builder.and(predicate, builder.like(r.get(param.getKey()), "%" + param.getValue() + "%"));
+            }
+            else if (r.get(param.getKey()).getJavaType() == Method.class) {
                 predicate = builder.and(predicate, builder.like(r.get(param.getKey()), "%" + param.getValue() + "%"));
             } else {
                 predicate = builder.and(predicate, builder.equal(r.get(param.getKey()), param.getValue()));
