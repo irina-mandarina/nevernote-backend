@@ -27,6 +27,8 @@ public class LogController {
         return logService.getNoteLogs(noteId);
     }
 
+    // pagination
+    // filter for user
     @GetMapping("/history/search")
     ResponseEntity<String> searchLogs(@RequestAttribute String username, @RequestParam(value = "search") String search,
                                       @RequestParam(value = "orderByDateDesc") Boolean orderByDateDesc) {

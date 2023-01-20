@@ -6,6 +6,7 @@ import com.example.demo.repositories.LogsRepository;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.models.GET.NoteResponse;
 import com.example.demo.repositories.search_criteria.SearchCriteria;
+import com.example.demo.types.AuthorityType;
 import com.example.demo.types.Method;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,8 @@ public class LogServiceImpl implements LogService {
 //    private final LogResponsesRepository logResponsesRepository;
     private final NoteService noteService;
     private final UserService userService;
+    private final AuthorityService authorityService;
+
     @Override
     public ResponseEntity<String> getNoteLogs(Long noteId) {
         if (Objects.isNull(noteService.findNoteById(noteId))) {
@@ -51,14 +54,30 @@ public class LogServiceImpl implements LogService {
         for (SearchCriteria param: params) {
             if (param.getKey().equals("username")) {
                 // Add a predicate to filter by user id and not username
-                predicate = builder.and(predicate, builder.equal(r.get("user"),
-                        userService.findByUsername((String) param.getValue()).getId()));
+                predicate = builder.and( predicate, builder.equal(r.get("user"),
+                        userService.findByUsername( (String) param.getValue() ) .getId())
+                );
                 // replace the param
                 params.set(params.indexOf(param), new SearchCriteria(
                         "user", param.getOperation(), userService.findByUsername((String) param.getValue()).getId()
                 ));
                 query.where(predicate);
             }
+        }
+        if (!authorityService.hasRole(username, AuthorityType.ADMIN)) {
+            User user = userService.findByUsername(username);
+            Predicate userPredicate = builder.equal( r.get("user"), user );
+            Predicate notePredicate = builder.equal(r.get("subject"), "note");
+
+            CriteriaBuilder.In<Long> in = builder.in(r.get("subjectId"));
+            List<Long> ids = noteService.findNotesByUser(user);
+            for (Long id : ids) {
+                in.value(id);
+            }
+            Predicate noteIdPredicate = builder.in(in);
+            notePredicate = builder.and(notePredicate, noteIdPredicate);
+
+            query.where(predicate, builder.or(userPredicate, notePredicate));
         }
         LogSearchQueryCriteriaConsumer searchConsumer = new LogSearchQueryCriteriaConsumer(predicate, builder, r);
         params.stream().forEach(searchConsumer);
