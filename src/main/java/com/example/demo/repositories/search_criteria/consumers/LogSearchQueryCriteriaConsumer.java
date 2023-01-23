@@ -37,7 +37,7 @@ public class LogSearchQueryCriteriaConsumer implements Consumer<SearchCriteria>{
                 predicate = builder.and(predicate, builder.like(r.get(param.getKey()), "%" + param.getValue() + "%"));
             }
             else if (r.get(param.getKey()).getJavaType() == Method.class) {
-                predicate = builder.and(predicate, builder.like(r.get(param.getKey()), "%" + param.getValue() + "%"));
+                predicate = builder.and(predicate, builder.equal(r.get(param.getKey()),  Method.valueOf((String) param.getValue()) ));
             } else {
                 predicate = builder.and(predicate, builder.equal(r.get(param.getKey()), param.getValue()));
             }

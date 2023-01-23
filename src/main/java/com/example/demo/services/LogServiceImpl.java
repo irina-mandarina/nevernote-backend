@@ -24,7 +24,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LogServiceImpl implements LogService {
     private final LogsRepository logsRepository;
-//    private final LogResponsesRepository logResponsesRepository;
     private final NoteService noteService;
     private final UserService userService;
     private final AuthorityService authorityService;
@@ -67,7 +66,6 @@ public class LogServiceImpl implements LogService {
                 params.set(params.indexOf(param), new SearchCriteria(
                         "user", param.getOperation(), userService.findByUsername((String) param.getValue()).getId()
                 ));
-//                query.where(predicate);
             }
         }
         // for users without an ADMIN role, show only their own logs and the logs for their notes
@@ -76,16 +74,11 @@ public class LogServiceImpl implements LogService {
             Predicate userPredicate = builder.equal( r.get("user"), user );
             Predicate notePredicate = builder.equal(r.get("subject"), "note");
 
-//            CriteriaBuilder.In<Long> in = builder.in(r.get("subjectId"));
             List<Long> ids = noteService.findNotesByUser(user);
-//            for (Long id : ids) {
-//                in.value(id);
-//            }
             Predicate noteIdPredicate = r.get("subjectId").in(ids);
             notePredicate = builder.and(notePredicate, noteIdPredicate);
 
             predicate = builder.and(predicate, builder.or(userPredicate, notePredicate));
-//            query.where(predicate, builder.or(userPredicate, notePredicate));
         }
         LogSearchQueryCriteriaConsumer searchConsumer = new LogSearchQueryCriteriaConsumer(predicate, builder, r);
         params.stream().forEach(searchConsumer);
