@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.example.demo.repositories.search_criteria.consumers.LogSearchQueryCriteriaConsumer;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.persistence.EntityManager;
 import java.sql.Timestamp;
@@ -45,7 +46,8 @@ public class LogServiceImpl implements LogService {
     private EntityManager entityManager;
 
     @Override
-    public ResponseEntity<String> searchLogs(String username, final List<SearchCriteria> params, List<OrderCriteria> orderParams) {
+    public ResponseEntity<String> searchLogs(String username, final List<SearchCriteria> params,
+                                             List<OrderCriteria> orderParams, int pageNumber, int pageSize) {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Log> query = builder.createQuery(Log.class);
         final Root<Log> r = query.from(Log.class);
@@ -97,8 +99,11 @@ public class LogServiceImpl implements LogService {
         }
         query.orderBy(order);
 
+        TypedQuery<Log> result = entityManager.createQuery(query);
+        result.setFirstResult(pageNumber -1);
+        result.setMaxResults(pageSize);
         List<LogResponse> response = logsToLogResponses(
-                entityManager.createQuery(query).getResultList()
+                result.getResultList()
         );
 
         return ResponseEntity.ok().body(

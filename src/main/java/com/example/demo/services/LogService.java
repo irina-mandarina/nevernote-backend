@@ -21,5 +21,6 @@ public interface LogService {
     List<LogResponse> logsToLogResponses(List<Log> logs);
     void log(ResponseEntity<String> response, String username, Method methodType, String path);
 
-    ResponseEntity<String> searchLogs(String username, final List<SearchCriteria> params, final List<OrderCriteria> orderParams);
+    ResponseEntity<String> searchLogs(String username, final List<SearchCriteria> params,
+                                      final List<OrderCriteria> orderParams, int pageNumber, int pageSize);
 }

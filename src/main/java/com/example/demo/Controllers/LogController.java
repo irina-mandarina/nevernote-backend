@@ -32,7 +32,9 @@ public class LogController {
     // filter for user
     @GetMapping("/history/search")
     ResponseEntity<String> searchLogs(@RequestAttribute String username, @RequestParam(value = "search") String search,
-                                      @RequestParam(value = "order") String order) {
+                                      @RequestParam(value = "order") String order,
+                                      @RequestParam(value = "pageNumber")  int pageNumber,
+                                      @RequestParam(value= "pageSize") int pageSize) {
         List<SearchCriteria> params = new ArrayList<SearchCriteria>();
         List<OrderCriteria> orderParams = new ArrayList();
         if (search != null) {
@@ -49,6 +51,6 @@ public class LogController {
                 orderParams.add(new OrderCriteria(matcher.group(1), matcher.group(3)));
             }
         }
-        return logService.searchLogs(username, params, orderParams);
+        return logService.searchLogs(username, params, orderParams, pageNumber, pageSize);
     }
 }
