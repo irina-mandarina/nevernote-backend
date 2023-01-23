@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.repositories.search_criteria.OrderCriteria;
 import com.example.demo.services.LogService;
 import com.example.demo.repositories.search_criteria.SearchCriteria;
 import lombok.AllArgsConstructor;
@@ -31,8 +32,9 @@ public class LogController {
     // filter for user
     @GetMapping("/history/search")
     ResponseEntity<String> searchLogs(@RequestAttribute String username, @RequestParam(value = "search") String search,
-                                      @RequestParam(value = "orderByDateDesc") Boolean orderByDateDesc) {
+                                      @RequestParam(value = "order") String order) {
         List<SearchCriteria> params = new ArrayList<SearchCriteria>();
+        List<OrderCriteria> orderParams = new ArrayList();
         if (search != null) {
             Pattern pattern = Pattern.compile("(\\w+?)(:|<|>)(\\w+?),");
             Matcher matcher = pattern.matcher(search + ",");
@@ -40,6 +42,13 @@ public class LogController {
                 params.add(new SearchCriteria(matcher.group(1), matcher.group(2), matcher.group(3)));
             }
         }
-        return logService.searchLogs(username, params, orderByDateDesc);
+        if (order != null) {
+            Pattern pattern = Pattern.compile("(\\w+?)(:)(asc|desc),");
+            Matcher matcher = pattern.matcher(order + ",");
+            while (matcher.find()) {
+                orderParams.add(new OrderCriteria(matcher.group(1), matcher.group(3)));
+            }
+        }
+        return logService.searchLogs(username, params, orderParams);
     }
 }

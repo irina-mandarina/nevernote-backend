@@ -5,6 +5,7 @@ import com.example.demo.Entities.User;
 import com.example.demo.repositories.LogsRepository;
 import com.example.demo.models.GET.LogResponse;
 import com.example.demo.models.GET.NoteResponse;
+import com.example.demo.repositories.search_criteria.OrderCriteria;
 import com.example.demo.repositories.search_criteria.SearchCriteria;
 import com.example.demo.types.AuthorityType;
 import com.example.demo.types.Method;
@@ -44,7 +45,7 @@ public class LogServiceImpl implements LogService {
     private EntityManager entityManager;
 
     @Override
-    public ResponseEntity<String> searchLogs(String username, final List<SearchCriteria> params, Boolean orderByDateDesc) {
+    public ResponseEntity<String> searchLogs(String username, final List<SearchCriteria> params, List<OrderCriteria> orderParams) {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Log> query = builder.createQuery(Log.class);
         final Root<Log> r = query.from(Log.class);
@@ -84,12 +85,17 @@ public class LogServiceImpl implements LogService {
         params.stream().forEach(searchConsumer);
         predicate = searchConsumer.getPredicate();
         query.where(predicate);
-        if (orderByDateDesc) {
-            query.orderBy(builder.desc(r.get("timestamp")));
+
+        List<Order> order = new ArrayList<>();
+        for (OrderCriteria param: orderParams) {
+            if (param.getDesc()) {
+                order.add(builder.desc(r.get(param.getKey())));
+            }
+            else {
+                order.add(builder.asc(r.get(param.getKey())));
+            }
         }
-        else {
-            query.orderBy(builder.asc(r.get("timestamp")));
-        }
+        query.orderBy(order);
 
         List<LogResponse> response = logsToLogResponses(
                 entityManager.createQuery(query).getResultList()
