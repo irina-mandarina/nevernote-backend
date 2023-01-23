@@ -54,30 +54,38 @@ public class LogServiceImpl implements LogService {
         for (SearchCriteria param: params) {
             if (param.getKey().equals("username")) {
                 // Add a predicate to filter by user id and not username
-                predicate = builder.and( predicate, builder.equal(r.get("user"),
-                        userService.findByUsername( (String) param.getValue() ) .getId())
-                );
-                // replace the param
+                try {
+                    predicate = builder.and(predicate, builder.equal(r.get("user"),
+                            userService.findByUsername((String) param.getValue()).getId())
+                    );
+                }
+                catch (NullPointerException e) {
+                    // no such user
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                }
+                    // replace the param
                 params.set(params.indexOf(param), new SearchCriteria(
                         "user", param.getOperation(), userService.findByUsername((String) param.getValue()).getId()
                 ));
-                query.where(predicate);
+//                query.where(predicate);
             }
         }
+        // for users without an ADMIN role, show only their own logs and the logs for their notes
         if (!authorityService.hasRole(username, AuthorityType.ADMIN)) {
             User user = userService.findByUsername(username);
             Predicate userPredicate = builder.equal( r.get("user"), user );
             Predicate notePredicate = builder.equal(r.get("subject"), "note");
 
-            CriteriaBuilder.In<Long> in = builder.in(r.get("subjectId"));
+//            CriteriaBuilder.In<Long> in = builder.in(r.get("subjectId"));
             List<Long> ids = noteService.findNotesByUser(user);
-            for (Long id : ids) {
-                in.value(id);
-            }
-            Predicate noteIdPredicate = builder.in(in);
+//            for (Long id : ids) {
+//                in.value(id);
+//            }
+            Predicate noteIdPredicate = r.get("subjectId").in(ids);
             notePredicate = builder.and(notePredicate, noteIdPredicate);
 
-            query.where(predicate, builder.or(userPredicate, notePredicate));
+            predicate = builder.and(predicate, builder.or(userPredicate, notePredicate));
+//            query.where(predicate, builder.or(userPredicate, notePredicate));
         }
         LogSearchQueryCriteriaConsumer searchConsumer = new LogSearchQueryCriteriaConsumer(predicate, builder, r);
         params.stream().forEach(searchConsumer);
